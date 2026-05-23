@@ -3,222 +3,917 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HACKPACK // CYBERDECK ONLINE</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+<title>HACKPACK // CYBERDECK</title>
 <style>
-/* СТИЛИ */
-*{
-    margin:0; padding:0; box-sizing:border-box;
-    user-select: none; -webkit-tap-highlight-color: transparent;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;}
+html,body{height:100%;overflow:hidden;}
 body{
-    background:#020202; color:#d9f7ff;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh; display: flex;
-    align-items: center; justify-content: center;
-    overflow: hidden;
+    background:#040810;
+    color:#d9f7ff;
+    font-family:'Segoe UI','SF Pro Display',system-ui,sans-serif;
+    position:relative;
 }
 
-.background-fx { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-.grid {
-    position: absolute; inset: 0;
-    background-image: linear-gradient(rgba(64,167,227,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(64,167,227,.05) 1px, transparent 1px);
-    background-size: 30px 30px; transform: perspective(500px) rotateX(60deg);
-    transform-origin: top; opacity: 0.5;
+/* === ФОН === */
+.bg-grid{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:
+        radial-gradient(ellipse at 50% 0%,rgba(64,167,227,.15),transparent 60%),
+        radial-gradient(ellipse at 50% 100%,rgba(0,255,200,.08),transparent 60%);
+}
+.bg-grid::before{
+    content:'';position:absolute;inset:0;
+    background-image:
+        linear-gradient(rgba(64,167,227,.08) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(64,167,227,.08) 1px,transparent 1px);
+    background-size:40px 40px;
+    transform:perspective(600px) rotateX(65deg);
+    transform-origin:top center;
+    mask-image:linear-gradient(to bottom,#000 0%,transparent 80%);
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 80%);
+    animation:gridScroll 8s linear infinite;
+}
+@keyframes gridScroll{
+    from{background-position:0 0;}
+    to{background-position:0 40px;}
+}
+.scanlines{
+    position:fixed;inset:0;z-index:2;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0,rgba(0,0,0,.15) 1px,transparent 1px,transparent 3px);
+    mix-blend-mode:multiply;
 }
 
-.panel {
-    width: 92%; max-width: 400px;
-    background: rgba(7, 10, 14, 0.95);
-    border: 1px solid rgba(64, 167, 227, 0.4);
-    border-radius: 24px; padding: 20px;
-    position: relative; z-index: 10;
-    backdrop-filter: blur(10px);
+/* === ПАНЕЛЬ === */
+.panel{
+    position:relative;z-index:10;
+    width:100%;max-width:460px;
+    height:100%;max-height:880px;
+    margin:0 auto;
+    padding:16px;
+    display:flex;flex-direction:column;
+    gap:12px;
 }
 
-.top-bar {
-    display: flex; justify-content: space-between;
-    margin-bottom: 20px; font-size: 11px; font-weight: bold;
+.top-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 14px;
+    background:rgba(10,20,35,.7);
+    border:1px solid rgba(64,167,227,.3);
+    border-radius:14px;
+    backdrop-filter:blur(10px);
+    font-size:11px;font-weight:700;letter-spacing:1px;
+}
+.logo{color:#40a7e3;text-shadow:0 0 10px rgba(64,167,227,.6);}
+.logo::before{content:'⟩ ';color:#00ffaa;}
+.status{color:#00ffaa;display:flex;align-items:center;gap:6px;}
+.dot{width:7px;height:7px;background:#00ffaa;border-radius:50%;box-shadow:0 0 8px #00ffaa;animation:pulse 1.5s infinite;}
+@keyframes pulse{50%{opacity:.3;}}
+
+/* === БАЛАНС === */
+.balance-card{
+    background:linear-gradient(135deg,rgba(64,167,227,.1),rgba(0,255,170,.05));
+    border:1px solid rgba(64,167,227,.4);
+    border-radius:20px;
+    padding:18px;
+    text-align:center;
+    backdrop-filter:blur(10px);
+    position:relative;overflow:hidden;
+}
+.balance-card::before{
+    content:'';position:absolute;inset:-2px;
+    background:conic-gradient(from 0deg,transparent,rgba(64,167,227,.4),transparent);
+    animation:rotate 4s linear infinite;
+    z-index:-1;opacity:.5;
+}
+@keyframes rotate{to{transform:rotate(360deg);}}
+.balance-label{font-size:10px;color:#8fdfff;letter-spacing:2px;margin-bottom:4px;}
+.balance{
+    font-size:44px;font-weight:900;color:#fff;
+    text-shadow:0 0 20px rgba(64,167,227,.8);
+    letter-spacing:-1px;line-height:1;
+}
+.balance .sym{color:#40a7e3;font-size:36px;}
+.per-sec{font-size:12px;color:#00ffaa;margin-top:6px;font-weight:600;}
+
+/* === СТАТЫ === */
+.stats-row{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
+}
+.stat-box{
+    background:rgba(10,20,35,.6);
+    border:1px solid rgba(64,167,227,.2);
+    border-radius:10px;
+    padding:8px;
+    text-align:center;
+    font-size:10px;
+}
+.stat-box .val{font-size:14px;color:#40a7e3;font-weight:800;margin-top:2px;}
+.stat-box .lbl{color:#8fdfff;letter-spacing:.5px;}
+
+/* === ТАБЫ === */
+.tabs{
+    display:flex;gap:4px;
+    background:rgba(10,20,35,.6);
+    border:1px solid rgba(64,167,227,.2);
+    border-radius:12px;
+    padding:4px;
+}
+.tab{
+    flex:1;padding:10px 6px;
+    text-align:center;font-size:11px;font-weight:700;
+    color:#8fdfff;cursor:pointer;
+    border-radius:8px;letter-spacing:.5px;
+    transition:all .2s;
+}
+.tab.active{
+    background:linear-gradient(135deg,#40a7e3,#2d7fb8);
+    color:#fff;
+    box-shadow:0 4px 15px rgba(64,167,227,.4);
 }
 
-.status-online { color: #4cd964; display: flex; align-items: center; gap: 5px; }
-.dot { width: 6px; height: 6px; background: #4cd964; border-radius: 50%; box-shadow: 0 0 8px #4cd964; animation: pulse 1.5s infinite; }
-
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-.balance { font-size: 42px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(64,167,227,0.5); }
-.balance span { color: #40a7e3; }
-
-.info-box {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px; padding: 15px; margin-bottom: 15px;
+/* === КОНТЕНТ === */
+.content{
+    flex:1;min-height:0;
+    background:rgba(10,20,35,.5);
+    border:1px solid rgba(64,167,227,.2);
+    border-radius:16px;
+    padding:12px;
+    overflow-y:auto;overflow-x:hidden;
+    backdrop-filter:blur(10px);
 }
-.info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
-.info-val { color: #40a7e3; font-weight: bold; }
+.tab-page{display:none;animation:fadeIn .3s;}
+.tab-page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-.content-area { height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.1); padding-top: 10px; }
+/* === ЛОГИ === */
+.log-entry{
+    font-family:'Courier New',monospace;
+    font-size:11px;color:#8fdfff;
+    padding:4px 8px;margin-bottom:3px;
+    border-left:2px solid rgba(64,167,227,.4);
+    animation:slideIn .3s;
+    word-break:break-word;
+}
+.log-entry.success{border-color:#00ffaa;color:#00ffaa;}
+.log-entry.warn{border-color:#ff8800;color:#ff8800;}
+.log-entry.ach{border-color:#ffd700;color:#ffd700;}
+.log-entry.err{border-color:#ff0055;color:#ff0055;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
 
-.upgrade-btn {
-    display: flex; justify-content: space-between;
-    background: rgba(64,167,227,0.1); padding: 12px;
-    border-radius: 12px; margin-bottom: 8px;
-    border: 1px solid rgba(64,167,227,0.2); cursor: pointer;
+/* === АПГРЕЙДЫ === */
+.upgrade{
+    display:flex;justify-content:space-between;align-items:center;
+    background:rgba(64,167,227,.06);
+    border:1px solid rgba(64,167,227,.25);
+    border-radius:12px;
+    padding:12px;margin-bottom:8px;
+    cursor:pointer;transition:all .15s;
+}
+.upgrade:hover{background:rgba(64,167,227,.12);border-color:#40a7e3;}
+.upgrade:active{transform:scale(.98);}
+.upgrade.disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5);}
+.upgrade.disabled:hover{background:rgba(64,167,227,.06);border-color:rgba(64,167,227,.25);}
+.upg-left{flex:1;min-width:0;}
+.upg-name{font-weight:700;color:#fff;font-size:13px;margin-bottom:2px;}
+.upg-desc{font-size:10px;color:#8fdfff;}
+.upg-cost{color:#00ffaa;font-weight:800;font-size:13px;white-space:nowrap;margin-left:8px;}
+
+/* === КНОПКА МАЙНИНГА === */
+.mine-btn{
+    width:100%;
+    padding:18px;
+    background:linear-gradient(135deg,#40a7e3 0%,#00c6ff 50%,#00ffaa 100%);
+    color:#001420;font-weight:900;font-size:17px;
+    border:none;border-radius:16px;cursor:pointer;
+    letter-spacing:2px;
+    box-shadow:0 8px 30px rgba(64,167,227,.5),inset 0 2px 0 rgba(255,255,255,.3);
+    position:relative;overflow:hidden;
+    transition:transform .1s;
+    touch-action:manipulation;
+}
+.mine-btn:active{transform:scale(.97);}
+.mine-btn::after{
+    content:'';position:absolute;top:0;left:-100%;
+    width:60%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+    animation:shine 2.5s infinite;
+}
+@keyframes shine{to{left:150%;}}
+
+/* === HACK GAME === */
+.hack-box{
+    background:rgba(0,0,0,.4);
+    border:1px solid #ff0055;
+    border-radius:12px;
+    padding:14px;margin-bottom:10px;
+    box-shadow:0 0 20px rgba(255,0,85,.2);
+}
+.hack-title{color:#ff0055;font-weight:800;font-size:13px;margin-bottom:10px;letter-spacing:1px;}
+.hack-bar{
+    height:30px;background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,0,85,.5);border-radius:6px;
+    overflow:hidden;position:relative;margin:8px 0;
+}
+.hack-zone{
+    position:absolute;top:0;height:100%;width:70px;
+    left:50%;transform:translateX(-50%);
+    background:rgba(0,255,170,.25);
+    border-left:2px solid #00ffaa;border-right:2px solid #00ffaa;
+}
+.hack-target{
+    position:absolute;top:0;height:100%;width:6px;
+    background:linear-gradient(180deg,#ff0055,#ffd700);
+    box-shadow:0 0 10px #ff0055;
+    animation:hackMove 1.8s linear infinite;
+}
+@keyframes hackMove{
+    0%{left:-6px;}100%{left:calc(100% + 6px);}
+}
+.hack-reward{text-align:center;font-size:11px;color:#8fdfff;margin:6px 0;}
+.hack-btn{
+    width:100%;padding:12px;
+    background:#ff0055;color:#fff;font-weight:800;
+    border:none;border-radius:8px;cursor:pointer;
+    letter-spacing:1px;font-size:13px;
+    box-shadow:0 4px 15px rgba(255,0,85,.4);
+}
+.hack-btn:active{transform:scale(.97);}
+
+/* === STATS === */
+.stat-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 12px;
+    background:rgba(64,167,227,.04);
+    border:1px solid rgba(64,167,227,.15);
+    border-radius:8px;
+    margin-bottom:5px;
+    font-size:12px;
+}
+.stat-row .k{color:#8fdfff;}
+.stat-row .v{color:#40a7e3;font-weight:700;}
+
+.ach-card{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;
+    background:rgba(255,215,0,.04);
+    border:1px solid rgba(255,215,0,.2);
+    border-radius:8px;
+    margin-bottom:5px;
+    font-size:11px;
+}
+.ach-card.locked{opacity:.35;filter:grayscale(1);}
+.ach-icon{font-size:20px;}
+.ach-info{flex:1;}
+.ach-name{color:#ffd700;font-weight:700;}
+.ach-desc{color:#8fdfff;font-size:10px;margin-top:2px;}
+
+.prestige-box{
+    background:linear-gradient(135deg,rgba(255,0,255,.1),rgba(64,167,227,.1));
+    border:1px solid rgba(255,0,255,.4);
+    border-radius:12px;
+    padding:14px;margin-bottom:10px;
+    text-align:center;
+}
+.prestige-title{color:#ff00ff;font-weight:800;letter-spacing:1px;margin-bottom:6px;}
+.prestige-gain{font-size:24px;color:#fff;font-weight:900;margin:6px 0;}
+.prestige-btn{
+    width:100%;padding:12px;margin-top:8px;
+    background:linear-gradient(135deg,#ff00ff,#40a7e3);
+    color:#fff;font-weight:800;border:none;
+    border-radius:8px;cursor:pointer;letter-spacing:1px;
+    box-shadow:0 4px 15px rgba(255,0,255,.4);
+}
+.prestige-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* === FLOATING === */
+.floating{
+    position:fixed;pointer-events:none;z-index:9999;
+    font-weight:900;font-size:22px;color:#00ffaa;
+    text-shadow:0 0 10px #00ffaa,0 0 20px #00ffaa;
+    animation:floatUp 1s ease-out forwards;
+    font-family:'Courier New',monospace;
+}
+@keyframes floatUp{
+    0%{transform:translate(-50%,0) scale(1);opacity:1;}
+    100%{transform:translate(-50%,-60px) scale(1.3);opacity:0;}
 }
 
-.actions { display: grid; gap: 10px; position: relative; z-index: 100; }
-button {
-    padding: 18px; border-radius: 16px; border: none;
-    font-weight: 800; font-size: 15px; cursor: pointer;
-    transition: 0.1s; touch-action: manipulation;
+/* === TOAST === */
+.toast{
+    position:fixed;top:20px;left:50%;
+    transform:translateX(-50%) translateY(-100px);
+    padding:12px 20px;border-radius:12px;
+    font-weight:700;z-index:10000;
+    animation:toastSlide 3.5s forwards;
+    letter-spacing:.5px;font-size:12px;
+    border:1px solid;min-width:220px;text-align:center;
+    backdrop-filter:blur(10px);
+    box-shadow:0 8px 30px rgba(0,0,0,.5);
 }
-button:active { transform: scale(0.96); filter: brightness(1.2); }
+.toast.ach{
+    background:rgba(255,215,0,.15);color:#ffd700;border-color:#ffd700;
+    box-shadow:0 8px 30px rgba(255,215,0,.4);
+}
+.toast.warn{
+    background:rgba(255,136,0,.15);color:#ff8800;border-color:#ff8800;
+}
+.toast.err{
+    background:rgba(255,0,85,.15);color:#ff0055;border-color:#ff0055;
+}
+.toast.success{
+    background:rgba(0,255,170,.15);color:#00ffaa;border-color:#00ffaa;
+}
+@keyframes toastSlide{
+    0%{transform:translateX(-50%) translateY(-100px);opacity:0;}
+    12%{transform:translateX(-50%) translateY(0);opacity:1;}
+    85%{transform:translateX(-50%) translateY(0);opacity:1;}
+    100%{transform:translateX(-50%) translateY(-100px);opacity:0;}
+}
 
-.btn-mine { background: #40a7e3; color: #fff; box-shadow: 0 4px 15px rgba(64,167,227,0.4); }
-.btn-shop { background: #161b22; color: #40a7e3; border: 1px solid #40a7e3; }
+/* === SCROLLBAR === */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(64,167,227,.4);border-radius:2px;}
 
-.log-entry { margin-bottom: 3px; opacity: 0.7; }
+/* === SECTION TITLE === */
+.section-title{
+    font-size:10px;color:#40a7e3;letter-spacing:2px;
+    margin:8px 0 10px;padding-bottom:6px;
+    border-bottom:1px solid rgba(64,167,227,.2);
+    font-weight:700;
+}
+
+.reset-btn{
+    width:100%;padding:10px;margin-top:10px;
+    background:rgba(255,0,85,.1);color:#ff0055;
+    border:1px solid rgba(255,0,85,.3);border-radius:8px;
+    cursor:pointer;font-weight:700;font-size:11px;
+    letter-spacing:1px;
+}
 </style>
 </head>
 <body>
 
-<div class="background-fx"><div class="grid"></div></div>
+<div class="bg-grid"></div>
+<div class="scanlines"></div>
 
 <div class="panel">
     <div class="top-bar">
-        <span>CYBERDECK v1.2</span>
-        <div class="status-online">
+        <div class="logo">CYBERDECK</div>
+        <div class="status">
             <div class="dot"></div>
-            ONLINE: <span id="user-count">0</span>
+            <span id="online">ONLINE</span>
         </div>
     </div>
 
-    <div class="balance"><span>⟠</span> <span id="hashes-val">0</span></div>
-
-    <div class="info-box">
-        <div class="info-row"><span>Auto-Mining:</span> <span class="info-val" id="rate-val">0 H/s</span></div>
-        <div class="info-row"><span>Power:</span> <span class="info-val" id="click-val">+1</span></div>
+    <div class="balance-card">
+        <div class="balance-label">VIRTUAL HASH</div>
+        <div class="balance"><span class="sym">⟠</span> <span id="hashes">0</span></div>
+        <div class="per-sec">+<span id="rate">0</span> H/s</div>
     </div>
 
-    <div class="content-area" id="main-content">
-        <div id="logs-view"></div>
-        <div id="shop-view" style="display:none;">
-            <div class="upgrade-btn" id="buy-click">
-                <span>[UPG] CLICK LVL <b id="c-lvl">1</b></span>
-                <span id="c-cost" style="color:#4cd964">50 H</span>
-            </div>
-            <div class="upgrade-btn" id="buy-auto">
-                <span>[UPG] BOT LVL <b id="a-lvl">0</b></span>
-                <span id="a-cost" style="color:#4cd964">150 H</span>
-            </div>
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="lbl">POWER</div>
+            <div class="val" id="click-pow">+1</div>
+        </div>
+        <div class="stat-box">
+            <div class="lbl">LVL</div>
+            <div class="val" id="lvl">1</div>
+        </div>
+        <div class="stat-box">
+            <div class="lbl">PRESTIGE</div>
+            <div class="val" id="prest">0</div>
         </div>
     </div>
 
-    <div class="actions">
-        <button class="btn-mine" id="mine-btn">MINE VIRTUAL HASH</button>
-        <button class="btn-shop" id="shop-btn">UPGRADES SHOP</button>
+    <div class="tabs">
+        <div class="tab active" data-tab="mine">⚡ MINE</div>
+        <div class="tab" data-tab="shop">🛒 SHOP</div>
+        <div class="tab" data-tab="hack">💀 HACK</div>
+        <div class="tab" data-tab="stats">📊 STATS</div>
     </div>
+
+    <div class="content">
+        <div class="tab-page active" id="pg-mine">
+            <div id="logs"></div>
+        </div>
+
+        <div class="tab-page" id="pg-shop">
+            <div class="section-title">// UPGRADES</div>
+            <div id="upgrades"></div>
+        </div>
+
+        <div class="tab-page" id="pg-hack">
+            <div class="section-title">// TARGET BREACH</div>
+            <div class="hack-box" id="hack-box">
+                <div class="hack-title">[ INTRUSION PROTOCOL ]</div>
+                <div class="hack-reward" id="hack-reward">Reward: ×20 click power</div>
+                <div class="hack-bar">
+                    <div class="hack-zone"></div>
+                    <div class="hack-target" id="hack-target"></div>
+                </div>
+                <button class="hack-btn" id="hack-btn">⚡ EXECUTE BREACH</button>
+                <div style="font-size:10px;color:#8fdfff;text-align:center;margin-top:8px;">
+                    Hit the green zone for max reward
+                </div>
+            </div>
+            <div class="section-title">// PAST HACKS</div>
+            <div id="hack-history"></div>
+        </div>
+
+        <div class="tab-page" id="pg-stats">
+            <div class="section-title">// STATISTICS</div>
+            <div id="stats-list"></div>
+
+            <div class="prestige-box" id="prestige-box" style="margin-top:14px;">
+                <div class="prestige-title">⟡ REBIRTH PROTOCOL</div>
+                <div style="font-size:11px;color:#8fdfff;">Reset progress for permanent bonus</div>
+                <div class="prestige-gain">+<span id="prest-gain">0</span> ⟡</div>
+                <div style="font-size:10px;color:#8fdfff;">Each ⟡ = +10% all income</div>
+                <button class="prestige-btn" id="prest-btn">INITIATE REBIRTH</button>
+                <div style="font-size:9px;color:#ff8800;margin-top:6px;">Need 100K total mined</div>
+            </div>
+
+            <div class="section-title" style="margin-top:14px;">// ACHIEVEMENTS</div>
+            <div id="ach-list"></div>
+
+            <button class="reset-btn" id="reset-btn">⚠ HARD RESET</button>
+        </div>
+    </div>
+
+    <button class="mine-btn" id="mine-btn">⚡ MINE HASH</button>
 </div>
 
 <script>
-// --- ТВОЙ КОНФИГУРАТОР FIREBASE ---
-const firebaseConfig = {
-  apiKey: "AIzaSyAI5Jz37Zs8ggO_5QLXTYU5QR9geh0wpHM",
-  authDomain: "games-hackpack.firebaseapp.com",
-  // ВАЖНО: databaseURL обычно выглядит так для Firebase
-  databaseURL: "https://games-hackpack-default-rtdb.firebaseio.com", 
-  projectId: "games-hackpack",
-  storageBucket: "games-hackpack.firebasestorage.app",
-  messagingSenderId: "765398567944",
-  appId: "1:765398567944:web:0e5f86189f4947187995bd"
-};
+// ============================================
+// === ANTI-CHEAT (мягкий, не банит зря) =====
+// ============================================
+const AC = {
+    clicks: [],
+    warnings: 0,
+    lastTick: Date.now(),
 
-// Инициализация
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+    checkClickSpeed() {
+        const now = Date.now();
+        this.clicks.push(now);
+        if (this.clicks.length > 20) this.clicks.shift();
+        if (this.clicks.length < 10) return true;
+        const span = now - this.clicks[0];
+        const cps = (this.clicks.length - 1) / (span / 1000);
+        if (cps > 15) {
+            this.warn(`Auto-clicker detected: ${cps.toFixed(1)} CPS`);
+            return false;
+        }
+        return true;
+    },
 
-// --- СЧЕТЧИК ОНЛАЙН (REALTIME) ---
-const userCountEl = document.getElementById('user-count');
-const presenceRef = db.ref('presence');
-const myPresenceRef = presenceRef.push();
+    checkTimeJump() {
+        const now = Date.now();
+        const dt = now - this.lastTick;
+        // Если вдруг dt слишком большой (смена времени / tab suspend)
+        // - не бан, просто режем доход
+        this.lastTick = now;
+        return dt;
+    },
 
-// Логика подключения/отключения
-db.ref('.info/connected').on('value', (snap) => {
-    if (snap.val() === true) {
-        myPresenceRef.onDisconnect().remove();
-        myPresenceRef.set(true);
+    validateState(s) {
+        if (s.hashes < 0 || s.totalMined < 0) return false;
+        if (s.clickLvl > 9999 || s.autoLvl > 9999) return false;
+        return true;
+    },
+
+    warn(msg) {
+        this.warnings++;
+        toast('⚠ ' + msg, 'warn');
+        log('[AC] ' + msg, 'warn');
+        if (this.warnings >= 5) {
+            toast('⚠ Multiple violations. Session flagged.', 'err');
+        }
     }
-});
+};
 
-// Обновление цифры на экране
-presenceRef.on('value', (snap) => {
-    userCountEl.textContent = snap.numChildren() || 1;
-});
+// ============================================
+// === STATE ==================================
+// ============================================
+const SAVE_KEY = 'cyberdeck_v4';
 
-// --- ЛОГИКА ИГРЫ ---
-const tg = window.Telegram.WebApp;
-tg.expand();
+const UPGRADES = [
+    { id:'click',   name:'CLICK BOOST',    desc:'+1 per click',  base:50,     mult:1.5,  perLvl:1 },
+    { id:'auto',    name:'MINING BOT',     desc:'+2 H/s',        base:150,    mult:1.7,  perLvl:2 },
+    { id:'gpu',     name:'GPU CLUSTER',    desc:'+10 H/s',       base:1500,   mult:1.85, perLvl:10 },
+    { id:'quantum', name:'QUANTUM CORE',   desc:'+50 H/s',       base:15000,  mult:2.0,  perLvl:50 },
+    { id:'ai',      name:'AI SWARM',       desc:'+250 H/s',      base:200000, mult:2.2,  perLvl:250 },
+];
 
-let hashes = parseFloat(localStorage.getItem('h_save') || '0');
-let clickLvl = parseInt(localStorage.getItem('c_lvl_save') || '1');
-let autoLvl = parseInt(localStorage.getItem('a_lvl_save') || '0');
-let inShop = false;
+const ACHIEVEMENTS = [
+    { id:'a1', icon:'🎯', name:'First Click',    desc:'Mine your first hash',  check:s => s.totalClicks >= 1 },
+    { id:'a2', icon:'💯', name:'Century',        desc:'Mine 100 total',        check:s => s.totalMined >= 100 },
+    { id:'a3', icon:'🔥', name:'Kilo Hash',      desc:'Mine 1,000 total',      check:s => s.totalMined >= 1000 },
+    { id:'a4', icon:'⚡', name:'Mega Hash',      desc:'Mine 1,000,000 total',  check:s => s.totalMined >= 1000000 },
+    { id:'a5', icon:'👆', name:'Click Addict',   desc:'1000 clicks',           check:s => s.totalClicks >= 1000 },
+    { id:'a6', icon:'🤖', name:'Automated',      desc:'Reach 10 H/s',          check:s => getRate() >= 10 },
+    { id:'a7', icon:'🏭', name:'Factory',        desc:'Reach 1000 H/s',        check:s => getRate() >= 1000 },
+    { id:'a8', icon:'💀', name:'Hacker',         desc:'Complete 5 hacks',      check:s => s.hacksDone >= 5 },
+    { id:'a9', icon:'🎯', name:'Sharpshooter',   desc:'Hack with >90% accuracy', check:s => s.bestHack >= 90 },
+    { id:'a10',icon:'⟡',  name:'Reborn',         desc:'Prestige once',         check:s => s.prestige >= 1 },
+];
 
-function updateUI() {
-    document.getElementById('hashes-val').textContent = Math.floor(hashes).toLocaleString();
-    document.getElementById('rate-val').textContent = (autoLvl * 2) + ' H/s';
-    document.getElementById('click-val').textContent = '+' + clickLvl;
-    document.getElementById('c-lvl').textContent = clickLvl;
-    document.getElementById('c-cost').textContent = Math.floor(50 * Math.pow(1.5, clickLvl-1)) + ' H';
-    document.getElementById('a-lvl').textContent = autoLvl;
-    document.getElementById('a-cost').textContent = Math.floor(150 * Math.pow(1.7, autoLvl)) + ' H';
-    
-    localStorage.setItem('h_save', hashes);
-    localStorage.setItem('c_lvl_save', clickLvl);
-    localStorage.setItem('a_lvl_save', autoLvl);
+let S = load() || {
+    hashes: 0,
+    totalMined: 0,
+    totalClicks: 0,
+    clickLvl: 1,
+    autoLvl: 0,
+    gpuLvl: 0,
+    quantumLvl: 0,
+    aiLvl: 0,
+    prestige: 0,
+    hacksDone: 0,
+    bestHack: 0,
+    hackHistory: [],
+    achievements: [],
+    lastSave: Date.now()
+};
+
+function save() {
+    S.lastSave = Date.now();
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e){}
 }
 
-document.getElementById('mine-btn').onclick = () => {
-    hashes += clickLvl;
-    addLog(`Decrypted +${clickLvl} H`);
-    updateUI();
-};
-
-document.getElementById('shop-btn').onclick = () => {
-    inShop = !inShop;
-    document.getElementById('logs-view').style.display = inShop ? 'none' : 'block';
-    document.getElementById('shop-view').style.display = inShop ? 'block' : 'none';
-    document.getElementById('shop-btn').textContent = inShop ? 'BACK TO LOGS' : 'UPGRADES SHOP';
-};
-
-document.getElementById('buy-click').onclick = () => {
-    let cost = Math.floor(50 * Math.pow(1.5, clickLvl-1));
-    if(hashes >= cost) { hashes -= cost; clickLvl++; updateUI(); }
-};
-
-document.getElementById('buy-auto').onclick = () => {
-    let cost = Math.floor(150 * Math.pow(1.7, autoLvl));
-    if(hashes >= cost) { hashes -= cost; autoLvl++; updateUI(); }
-};
-
-function addLog(txt) {
-    if(inShop) return;
-    const logBox = document.getElementById('logs-view');
-    const l = document.createElement('div');
-    l.className = 'log-entry';
-    l.textContent = `> ${txt}`;
-    logBox.prepend(l);
-    if(logBox.children.length > 6) logBox.lastChild.remove();
+function load() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        if (!AC.validateState(s)) return null;
+        // offline earnings
+        const offline = (Date.now() - (s.lastSave || Date.now())) / 1000;
+        if (offline > 60 && offline < 86400) {
+            const rate = calcRate(s);
+            const earn = Math.floor(rate * offline * 0.3);
+            if (earn > 0) {
+                s.hashes += earn;
+                s.totalMined += earn;
+                setTimeout(() => {
+                    toast(`⏰ Offline: +${fmt(earn)} H`, 'success');
+                    log(`[SYS] Offline earnings: +${fmt(earn)} H`, 'success');
+                }, 500);
+            }
+        }
+        return s;
+    } catch(e) { return null; }
 }
 
-// Доход 10 раз в секунду для плавности
-setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
+function reset() {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+}
 
-updateUI();
+// ============================================
+// === HELPERS ================================
+// ============================================
+function fmt(n) {
+    n = Math.floor(n);
+    if (n >= 1e12) return (n/1e12).toFixed(2) + 'T';
+    if (n >= 1e9)  return (n/1e9).toFixed(2) + 'B';
+    if (n >= 1e6)  return (n/1e6).toFixed(2) + 'M';
+    if (n >= 1e3)  return (n/1e3).toFixed(2) + 'K';
+    return n.toLocaleString();
+}
+
+function getUpgCost(u) {
+    const lvl = S[u.id + 'Lvl'];
+    return Math.floor(u.base * Math.pow(u.mult, lvl));
+}
+
+function calcRate(state) {
+    state = state || S;
+    const base = (state.autoLvl * 2) + (state.gpuLvl * 10) + (state.quantumLvl * 50) + (state.aiLvl * 250);
+    const mult = 1 + (state.prestige * 0.1);
+    return base * mult;
+}
+
+function getRate() { return calcRate(S); }
+
+function getClickPower() {
+    return Math.floor((1 + S.clickLvl - 1) * (1 + S.prestige * 0.1));
+}
+
+function getPrestigeGain() {
+    return Math.floor(Math.sqrt(S.totalMined / 100000));
+}
+
+function getLevel() {
+    return 1 + Math.floor(Math.log10(Math.max(10, S.totalMined)));
+}
+
+// ============================================
+// === UI HELPERS =============================
+// ============================================
+function log(msg, cls='') {
+    const el = document.getElementById('logs');
+    if (!el) return;
+    const d = document.createElement('div');
+    d.className = 'log-entry' + (cls ? ' ' + cls : '');
+    d.textContent = '⟩ ' + msg;
+    el.prepend(d);
+    while (el.children.length > 30) el.lastChild.remove();
+}
+
+function toast(msg, cls='success') {
+    const t = document.createElement('div');
+    t.className = 'toast ' + cls;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3600);
+}
+
+function float(x, y, val) {
+    const f = document.createElement('div');
+    f.className = 'floating';
+    f.textContent = '+' + fmt(val);
+    f.style.left = x + 'px';
+    f.style.top = y + 'px';
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 1000);
+}
+
+// ============================================
+// === ACTIONS ================================
+// ============================================
+function mine(e) {
+    if (!AC.checkClickSpeed()) return;
+    const p = getClickPower();
+    S.hashes += p;
+    S.totalMined += p;
+    S.totalClicks++;
+    if (e) float(e.clientX, e.clientY, p);
+    if (Math.random() < 0.15) log(`[MINE] +${fmt(p)} H`, 'success');
+    checkAchievements();
+    render();
+}
+
+function buyUpgrade(id) {
+    const u = UPGRADES.find(x => x.id === id);
+    if (!u) return;
+    const cost = getUpgCost(u);
+    if (S.hashes < cost) { toast('Not enough hashes', 'err'); return; }
+    S.hashes -= cost;
+    S[u.id + 'Lvl']++;
+    log(`[UPG] ${u.name} → LVL ${S[u.id + 'Lvl']}`, 'success');
+    checkAchievements();
+    render();
+}
+
+function doPrestige() {
+    const gain = getPrestigeGain();
+    if (gain < 1) { toast('Need more progress', 'err'); return; }
+    // Custom confirm
+    if (!window.confirm(`Rebirth for +${gain} ⟡?\nAll progress except achievements and prestige will reset.`)) return;
+    const keep = { prestige: S.prestige + gain, achievements: S.achievements.slice() };
+    S = {
+        hashes: 0, totalMined: 0, totalClicks: 0,
+        clickLvl: 1, autoLvl: 0, gpuLvl: 0, quantumLvl: 0, aiLvl: 0,
+        hacksDone: 0, bestHack: 0, hackHistory: [],
+        lastSave: Date.now(),
+        ...keep
+    };
+    toast(`⟡ REBORN! +${gain} prestige`, 'success');
+    log(`[PRESTIGE] Reborn with +${gain} ⟡`, 'ach');
+    save();
+    render();
+}
+
+let hackRunning = false;
+function doHack() {
+    if (hackRunning) return;
+    hackRunning = true;
+    const btn = document.getElementById('hack-btn');
+    btn.disabled = true;
+    btn.textContent = '⟳ TARGETING...';
+
+    const target = document.getElementById('hack-target');
+    target.style.animationPlayState = 'running';
+
+    // Через случайное время ловим позицию
+    const delay = 600 + Math.random() * 1200;
+    setTimeout(() => {
+        const bar = target.parentElement;
+        const barW = bar.offsetWidth;
+        const targetRect = target.getBoundingClientRect();
+        const barRect = bar.getBoundingClientRect();
+        const tCenter = targetRect.left - barRect.left + targetRect.width / 2;
+        const zoneCenter = barW / 2;
+        const zoneW = 70;
+        const dist = Math.abs(tCenter - zoneCenter);
+        const maxDist = zoneW / 2 + 20;
+        const acc = Math.max(0, Math.round(100 * (1 - dist / maxDist)));
+
+        const baseReward = getClickPower() * 20;
+        const reward = Math.floor(baseReward * (acc / 100));
+        S.hashes += reward;
+        S.totalMined += reward;
+        S.hacksDone++;
+        if (acc > S.bestHack) S.bestHack = acc;
+        S.hackHistory.unshift({ acc, reward, time: Date.now() });
+        if (S.hackHistory.length > 10) S.hackHistory.pop();
+
+        let color = '#ff0055', label = 'FAILED';
+        if (acc >= 80) { color = '#00ffaa'; label = 'CRITICAL'; }
+        else if (acc >= 50) { color = '#ffd700'; label = 'PARTIAL'; }
+
+        toast(`${label} HACK! ${acc}% → +${fmt(reward)} H`, acc >= 50 ? 'success' : 'err');
+        log(`[HACK] ${label} ${acc}% → +${fmt(reward)} H`, acc >= 50 ? 'success' : 'err');
+
+        btn.disabled = false;
+        btn.textContent = '⚡ EXECUTE BREACH';
+        hackRunning = false;
+        checkAchievements();
+        render();
+    }, delay);
+}
+
+function checkAchievements() {
+    for (const a of ACHIEVEMENTS) {
+        if (S.achievements.includes(a.id)) continue;
+        if (a.check(S)) {
+            S.achievements.push(a.id);
+            toast(`${a.icon} ${a.name}`, 'ach');
+            log(`[ACH] ${a.name} — ${a.desc}`, 'ach');
+        }
+    }
+}
+
+// ============================================
+// === RENDER =================================
+// ============================================
+function renderUpgrades() {
+    const el = document.getElementById('upgrades');
+    el.innerHTML = '';
+    UPGRADES.forEach(u => {
+        const cost = getUpgCost(u);
+        const lvl = S[u.id + 'Lvl'];
+        const can = S.hashes >= cost;
+        const d = document.createElement('div');
+        d.className = 'upgrade' + (can ? '' : ' disabled');
+        d.innerHTML = `
+            <div class="upg-left">
+                <div class="upg-name">${u.name} <span style="color:#40a7e3;">LV ${lvl}</span></div>
+                <div class="upg-desc">${u.desc}</div>
+            </div>
+            <div class="upg-cost">${fmt(cost)} H</div>
+        `;
+        if (can) d.onclick = () => buyUpgrade(u.id);
+        el.appendChild(d);
+    });
+}
+
+function renderStats() {
+    const el = document.getElementById('stats-list');
+    const rows = [
+        ['Total Mined', fmt(S.totalMined) + ' H'],
+        ['Total Clicks', fmt(S.totalClicks)],
+        ['Click Power', '+' + fmt(getClickPower()) + ' H'],
+        ['Auto Rate', fmt(getRate()) + ' H/s'],
+        ['Player Level', getLevel()],
+        ['Prestige', S.prestige + ' ⟡ (×' + (1 + S.prestige*0.1).toFixed(1) + ')'],
+        ['Hacks Done', S.hacksDone],
+        ['Best Hack', S.bestHack + '%'],
+        ['Achievements', S.achievements.length + '/' + ACHIEVEMENTS.length],
+    ];
+    el.innerHTML = rows.map(([k,v]) => `
+        <div class="stat-row"><span class="k">${k}</span><span class="v">${v}</span></div>
+    `).join('');
+}
+
+function renderAch() {
+    const el = document.getElementById('ach-list');
+    el.innerHTML = ACHIEVEMENTS.map(a => {
+        const ok = S.achievements.includes(a.id);
+        return `
+            <div class="ach-card ${ok ? '' : 'locked'}">
+                <div class="ach-icon">${ok ? a.icon : '🔒'}</div>
+                <div class="ach-info">
+                    <div class="ach-name">${a.name}</div>
+                    <div class="ach-desc">${a.desc}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderHackHistory() {
+    const el = document.getElementById('hack-history');
+    if (!S.hackHistory.length) {
+        el.innerHTML = '<div style="text-align:center;color:#8fdfff;font-size:11px;padding:10px;">No hacks yet</div>';
+        return;
+    }
+    el.innerHTML = S.hackHistory.map(h => {
+        const c = h.acc >= 80 ? '#00ffaa' : h.acc >= 50 ? '#ffd700' : '#ff0055';
+        const ago = Math.floor((Date.now() - h.time) / 1000);
+        const agoStr = ago < 60 ? ago + 's ago' : Math.floor(ago/60) + 'm ago';
+        return `
+            <div class="stat-row">
+                <span class="k" style="color:${c}">● ${h.acc}%</span>
+                <span class="v">+${fmt(h.reward)} H</span>
+                <span class="k">${agoStr}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderPrestige() {
+    const gain = getPrestigeGain();
+    document.getElementById('prest-gain').textContent = gain;
+    document.getElementById('prest-btn').disabled = gain < 1;
+}
+
+function render() {
+    document.getElementById('hashes').textContent = fmt(S.hashes);
+    document.getElementById('rate').textContent = fmt(getRate());
+    document.getElementById('click-pow').textContent = '+' + fmt(getClickPower());
+    document.getElementById('lvl').textContent = getLevel();
+    document.getElementById('prest').textContent = S.prestige;
+    document.getElementById('hack-reward').textContent = `Reward: up to ${fmt(getClickPower() * 20)} H`;
+
+    renderUpgrades();
+    renderStats();
+    renderAch();
+    renderHackHistory();
+    renderPrestige();
+}
+
+// ============================================
+// === TABS ===================================
+// ============================================
+document.querySelectorAll('.tab').forEach(t => {
+    t.onclick = () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-page').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById('pg-' + t.dataset.tab).classList.add('active');
+    };
+});
+
+// ============================================
+// === EVENTS =================================
+// ============================================
+document.getElementById('mine-btn').addEventListener('click', mine);
+document.getElementById('hack-btn').addEventListener('click', doHack);
+document.getElementById('prest-btn').addEventListener('click', doPrestige);
+document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Delete ALL progress? Cannot be undone!')) reset();
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); mine(null); }
+});
+
+// ============================================
+// === GAME LOOP ==============================
+// ============================================
+let lastTick = Date.now();
+setInterval(() => {
+    const now = Date.now();
+    const dt = AC.checkTimeJump() / 1000;
+    // Clamp dt to avoid huge jumps on tab switch (античит lite)
+    const safeDt = Math.min(dt, 2);
+
+    const rate = getRate();
+    if (rate > 0) {
+        const earn = rate * safeDt;
+        S.hashes += earn;
+        S.totalMined += earn;
+    }
+    render();
+}, 200);
+
+// Autosave
+setInterval(save, 5000);
+window.addEventListener('beforeunload', save);
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') save();
+});
+
+// Fake online counter
+setInterval(() => {
+    const n = Math.floor(Math.random() * 200) + 50 + S.prestige * 5;
+    document.getElementById('online').textContent = n + ' ONLINE';
+}, 4000);
+
+// Telegram WebApp
+try {
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.expand(); tg.ready(); }
+} catch(e) {}
+
+// Init
+log('[SYS] Cyberdeck online', 'success');
+log('[SYS] Anti-cheat active', 'warn');
+log('[SYS] Press SPACE or tap MINE', '');
+render();
 </script>
 </body>
 </html>
