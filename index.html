@@ -112,17 +112,7 @@
 
         function copyRefLink() {
             const userId = tg.initDataUnsafe?.user?.id || "user";
-            
-            // Автоматически получаем юзернейм бота, в котором открыта Mini App
-            let botUser = "bot";
-            if (tg.initDataUnsafe?.receiver?.username) {
-                botUser = tg.initDataUnsafe.receiver.username;
-            } else {
-                // Резервный вариант, если запускается через прямую ссылку или WebAppChat
-                botUser = tg.initDataUnsafe?.chat?.username || "cointbot_pro_bot"; 
-            }
-
-            const botLink = "https://t.me/" + botUser + "?start=ref_" + userId; 
+            const botLink = "https://t.me/moneylan_bot/hackpack?startapp=ref_" + userId; 
             
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(botLink).then(() => {
