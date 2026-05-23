@@ -1,39 +1,53 @@
-# CyberDeck Terminal Dashboard (Anti-Scam Edition)
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HACKPACK // CYBERDECK</title>
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
+html{
+    overflow-x:hidden;
+}
+
 body{
     background:#020202;
     color:#d9f7ff;
     font-family:Inter,system-ui,sans-serif;
-    overflow:hidden;
-    height:100vh;
+
+    min-height:100vh;
+
     display:flex;
     justify-content:center;
-    align-items:center;
+
+    overflow-x:hidden;
+    overflow-y:auto;
+
+    padding:20px;
+
+    position:relative;
 }
+
+/* BACKGROUND */
 
 body::before{
     content:"";
     position:fixed;
     inset:0;
+
     background:
         radial-gradient(circle at top,#0f3d52 0%,transparent 40%),
         radial-gradient(circle at bottom,#07161d 0%,transparent 45%);
+
     opacity:.6;
     pointer-events:none;
 }
@@ -41,47 +55,94 @@ body::before{
 .grid{
     position:fixed;
     inset:0;
+
     background-image:
         linear-gradient(rgba(64,167,227,.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(64,167,227,.08) 1px, transparent 1px);
+
     background-size:40px 40px;
+
     transform:perspective(900px) rotateX(60deg);
     transform-origin:top;
+
     opacity:.18;
+    pointer-events:none;
 }
 
+.scanline{
+    position:fixed;
+    inset:0;
+
+    pointer-events:none;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent 50%,
+            rgba(255,255,255,.02) 51%
+        );
+
+    background-size:100% 4px;
+    mix-blend-mode:soft-light;
+}
+
+/* PANEL */
+
 .panel{
-    width:92%;
+    width:100%;
     max-width:420px;
+
     background:rgba(7,10,14,.88);
+
     border:1px solid rgba(64,167,227,.35);
     border-radius:26px;
+
     padding:24px;
+
     position:relative;
+
     backdrop-filter:blur(14px);
+
     box-shadow:
         0 0 50px rgba(64,167,227,.12),
         inset 0 0 20px rgba(64,167,227,.05);
+
+    margin:auto;
+
+    z-index:2;
 }
 
 .panel::after{
     content:"";
+
     position:absolute;
     inset:0;
+
     border-radius:26px;
     padding:1px;
-    background:linear-gradient(135deg,rgba(64,167,227,.6),transparent);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(64,167,227,.6),
+            transparent
+        );
+
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
+
     -webkit-mask-composite:xor;
     mask-composite:exclude;
 }
+
+/* TOP */
 
 .top{
     display:flex;
     justify-content:space-between;
     align-items:center;
+
     margin-bottom:22px;
 }
 
@@ -95,6 +156,7 @@ body::before{
 .status{
     font-size:11px;
     color:#4cd964;
+
     display:flex;
     align-items:center;
     gap:7px;
@@ -103,16 +165,26 @@ body::before{
 .dot{
     width:8px;
     height:8px;
+
     border-radius:50%;
+
     background:#4cd964;
     box-shadow:0 0 10px #4cd964;
+
     animation:pulse 1s infinite;
 }
 
 @keyframes pulse{
-    0%,100%{opacity:1}
-    50%{opacity:.3}
+    0%,100%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.3;
+    }
 }
+
+/* BALANCE */
 
 .balance-box{
     text-align:center;
@@ -121,47 +193,64 @@ body::before{
 
 .balance-label{
     color:#7d93a0;
+
     text-transform:uppercase;
     letter-spacing:2px;
+
     font-size:11px;
+
     margin-bottom:8px;
 }
 
 .balance{
     font-size:54px;
     font-weight:900;
+
     text-shadow:0 0 25px rgba(64,167,227,.35);
+
+    word-break:break-word;
 }
 
 .balance span{
     color:#40a7e3;
 }
 
+/* CARDS */
+
 .cards{
     display:grid;
     gap:12px;
+
     margin-bottom:18px;
 }
 
 .card{
     background:rgba(255,255,255,.03);
+
     border:1px solid rgba(255,255,255,.06);
     border-radius:16px;
+
     padding:14px;
+
+    overflow:hidden;
 }
 
 .card-title{
     font-size:11px;
     color:#40a7e3;
+
     text-transform:uppercase;
     letter-spacing:1px;
+
     margin-bottom:10px;
 }
 
 .metric{
     display:flex;
     justify-content:space-between;
+
     margin-bottom:8px;
+
     font-size:13px;
 }
 
@@ -169,34 +258,60 @@ body::before{
     margin-bottom:0;
 }
 
+/* BAR */
+
 .bar{
     width:100%;
     height:8px;
+
     border-radius:20px;
+
     background:#0d1318;
+
     overflow:hidden;
 }
 
 .bar-fill{
     height:100%;
     width:68%;
-    background:linear-gradient(90deg,#40a7e3,#7de2ff);
+
+    background:
+        linear-gradient(
+            90deg,
+            #40a7e3,
+            #7de2ff
+        );
+
     box-shadow:0 0 18px rgba(64,167,227,.5);
+
     animation:move 3s infinite linear;
 }
 
 @keyframes move{
-    0%{filter:hue-rotate(0deg)}
-    100%{filter:hue-rotate(20deg)}
+    0%{
+        filter:hue-rotate(0deg);
+    }
+
+    100%{
+        filter:hue-rotate(20deg);
+    }
 }
+
+/* LOGS */
 
 .logs{
     height:120px;
+
     overflow:hidden;
+
     font-family:monospace;
     font-size:11px;
+
     color:#8fdfff;
+
     line-height:1.7;
+
+    word-break:break-word;
 }
 
 .log-line{
@@ -205,23 +320,39 @@ body::before{
 }
 
 @keyframes flicker{
-    from{opacity:0;transform:translateY(6px)}
-    to{opacity:.85;transform:none}
+    from{
+        opacity:0;
+        transform:translateY(6px);
+    }
+
+    to{
+        opacity:.85;
+        transform:none;
+    }
 }
+
+/* BUTTONS */
 
 .actions{
     display:grid;
     grid-template-columns:1fr 1fr;
+
     gap:12px;
+
     margin-top:18px;
 }
 
 button{
     border:none;
+
     cursor:pointer;
+
     padding:15px;
+
     border-radius:16px;
+
     font-weight:800;
+
     transition:.2s;
 }
 
@@ -232,34 +363,62 @@ button:active{
 .primary{
     background:#40a7e3;
     color:#fff;
+
     box-shadow:0 0 20px rgba(64,167,227,.3);
 }
 
 .secondary{
     background:#0f1317;
     color:#cfefff;
+
     border:1px solid rgba(64,167,227,.25);
 }
 
+/* FOOTER */
+
 .footer{
     margin-top:18px;
+
     text-align:center;
+
     color:#5f717c;
+
     font-size:10px;
     letter-spacing:1px;
+
+    line-height:1.6;
 }
 
-.scanline{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:linear-gradient(to bottom,transparent 50%,rgba(255,255,255,.02) 51%);
-    background-size:100% 4px;
-    mix-blend-mode:soft-light;
+/* MOBILE */
+
+@media(max-width:480px){
+
+    body{
+        padding:12px;
+    }
+
+    .panel{
+        padding:18px;
+        border-radius:22px;
+    }
+
+    .balance{
+        font-size:42px;
+    }
+
+    .actions{
+        grid-template-columns:1fr;
+    }
+
+    button{
+        width:100%;
+    }
+
 }
 
 </style>
 </head>
+
 <body>
 
 <div class="grid"></div>
@@ -268,23 +427,38 @@ button:active{
 <div class="panel">
 
     <div class="top">
-        <div class="logo">HACKPACK</div>
+
+        <div class="logo">
+            HACKPACK
+        </div>
 
         <div class="status">
             <div class="dot"></div>
             SYSTEM ONLINE
         </div>
+
     </div>
 
     <div class="balance-box">
-        <div class="balance-label">Network Processing Power</div>
-        <div class="balance"><span>⟠</span><span id="power">0</span></div>
+
+        <div class="balance-label">
+            Network Processing Power
+        </div>
+
+        <div class="balance">
+            <span>⟠</span>
+            <span id="power">0</span>
+        </div>
+
     </div>
 
     <div class="cards">
 
         <div class="card">
-            <div class="card-title">GPU Cluster</div>
+
+            <div class="card-title">
+                GPU Cluster
+            </div>
 
             <div class="metric">
                 <span>Temperature</span>
@@ -299,18 +473,31 @@ button:active{
             <div class="bar">
                 <div class="bar-fill"></div>
             </div>
+
         </div>
 
         <div class="card">
-            <div class="card-title">Live Terminal Feed</div>
+
+            <div class="card-title">
+                Live Terminal Feed
+            </div>
+
             <div class="logs" id="logs"></div>
+
         </div>
 
     </div>
 
     <div class="actions">
-        <button class="primary" onclick="boost()">BOOST NODE</button>
-        <button class="secondary" onclick="clearLogs()">CLEAR LOGS</button>
+
+        <button class="primary" onclick="boost()">
+            BOOST NODE
+        </button>
+
+        <button class="secondary" onclick="clearLogs()">
+            CLEAR LOGS
+        </button>
+
     </div>
 
     <div class="footer">
@@ -320,11 +507,15 @@ button:active{
 </div>
 
 <script>
+
 const tg = window.Telegram.WebApp;
+
 try{
     tg.expand();
     tg.setHeaderColor('#000000');
 }catch(e){}
+
+/* ELEMENTS */
 
 const logs = document.getElementById('logs');
 const power = document.getElementById('power');
@@ -333,7 +524,10 @@ const load = document.getElementById('load');
 
 let powerValue = 0;
 
+/* LOG DATABASE */
+
 const fakeLogs = [
+
     'NODE_04 > packet stream synchronized',
     'GPU_CLUSTER > neural relay stable',
     'CORE > entropy calibration complete',
@@ -344,48 +538,88 @@ const fakeLogs = [
     'MEMORY > cache cleaned successfully',
     'CYBERDECK > passive scan enabled',
     'PROXY > route switched automatically'
+
 ];
 
+/* ADD LOG */
+
 function addLog(){
+
     const div = document.createElement('div');
+
     div.className = 'log-line';
 
-    const text = fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
-    const time = new Date().toLocaleTimeString();
+    const text =
+        fakeLogs[
+            Math.floor(Math.random() * fakeLogs.length)
+        ];
 
-    div.textContent = '[' + time + '] ' + text;
+    const time =
+        new Date().toLocaleTimeString();
+
+    div.textContent =
+        '[' + time + '] ' + text;
 
     logs.prepend(div);
 
     while(logs.children.length > 8){
         logs.removeChild(logs.lastChild);
     }
+
 }
+
+/* UPDATE STATS */
 
 function updateStats(){
+
     powerValue += Math.random() * 8;
 
-    power.textContent = Math.floor(powerValue).toLocaleString();
+    power.textContent =
+        Math.floor(powerValue).toLocaleString();
 
-    temp.textContent = (58 + Math.floor(Math.random()*9)) + '°C';
-    load.textContent = (62 + Math.floor(Math.random()*18)) + '%';
+    temp.textContent =
+        (58 + Math.floor(Math.random() * 9)) + '°C';
+
+    load.textContent =
+        (62 + Math.floor(Math.random() * 18)) + '%';
+
 }
 
+/* BOOST */
+
 function boost(){
+
     powerValue += 250;
+
     addLog();
 
     try{
-        tg.showAlert('Node boost complete. Performance increased.');
+
+        tg.showAlert(
+            'Node boost complete. Performance increased.'
+        );
+
     }catch(e){
-        alert('Node boost complete.');
+
+        alert(
+            'Node boost complete.'
+        );
+
     }
+
 }
 
+/* CLEAR LOGS */
+
 function clearLogs(){
+
     logs.innerHTML = '';
+
     addLog();
+
 }
+
+/* START */
 
 setInterval(addLog,1200);
 setInterval(updateStats,300);
@@ -398,14 +632,3 @@ for(let i=0;i<5;i++){
 
 </body>
 </html>
-```
-
-Что изменилось:
-
-* убран fake withdraw/scam UX
-* стиль стал как cyberdeck terminal
-* добавлены fake system logs
-* GPU metrics
-* sci‑fi сетка и scanlines
-* нет подозрительных TON-переводов
-* интерфейс выглядит как HUD, а не как развод
