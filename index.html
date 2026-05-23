@@ -100,6 +100,23 @@
         let balance = 0.00;
         let isDead = false;
         const balanceDisplay = document.getElementById('balance');
+        const refCountDisplay = document.getElementById('ref-count');
+
+        // Инициализация счетчика рефералов из памяти устройства
+        let refCount = parseInt(localStorage.getItem('ref_clicks') || '0');
+        refCountDisplay.innerText = refCount;
+
+        // Проверяем, зашли ли по реферальной ссылке
+        const startParam = tg.initDataUnsafe?.start_param || "";
+        if (startParam.startsWith('ref_')) {
+            // Если в запущенной ссылке есть реферал, то увеличиваем локальный счетчик (для имитации работы)
+            if (!localStorage.getItem('ref_registered')) {
+                refCount += 1;
+                localStorage.setItem('ref_clicks', refCount);
+                localStorage.setItem('ref_registered', 'true');
+                refCountDisplay.innerText = refCount;
+            }
+        }
 
         function mine() {
             if (isDead) return;
@@ -111,7 +128,7 @@
         setInterval(mine, 100);
 
         function copyRefLink() {
-            const userId = tg.initDataUnsafe?.user?.id || "user";
+            const userId = tg.initDataUnsafe?.user?.id || "1473585452";
             const botLink = "https://t.me/moneylan_bot/hackpack?startapp=ref_" + userId; 
             
             if (navigator.clipboard) {
