@@ -1,260 +1,411 @@
+# CyberDeck Terminal Dashboard (Anti-Scam Edition)
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CointBot Pro | Terminal</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: #000000;
-            color: white;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACKPACK // CYBERDECK</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        .balance-container { text-align: center; margin-bottom: 25px; }
-        .label-top { color: #8a8a8e; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .balance-value { font-size: 50px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 0 25px rgba(64, 167, 227, 0.4); }
-        .currency { color: #40a7e3; margin-right: 5px; }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        .input-group { width: 85%; max-width: 320px; margin-bottom: 12px; }
-        .input-label { font-size: 10px; color: #40a7e3; font-weight: bold; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
-        input {
-            width: 100%; background: #111; border: 1px solid #222; border-radius: 14px;
-            padding: 14px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: #40a7e3; background: #161616; }
+body{
+    background:#020202;
+    color:#d9f7ff;
+    font-family:Inter,system-ui,sans-serif;
+    overflow:hidden;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 
-        .tasks-box {
-            width: 85%; max-width: 320px; background: rgba(64, 167, 227, 0.05);
-            border: 1px dashed #333; border-radius: 14px; padding: 15px; margin-bottom: 12px; box-sizing: border-box;
-        }
-        .task-item { display: flex; justify-content: space-between; align-items: center; }
-        .task-btn {
-            background: #40a7e3; color: white; border: none; padding: 6px 12px;
-            border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none;
-        }
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at top,#0f3d52 0%,transparent 40%),
+        radial-gradient(circle at bottom,#07161d 0%,transparent 45%);
+    opacity:.6;
+    pointer-events:none;
+}
 
-        .withdraw-btn {
-            width: 85%; max-width: 320px; background: #ffffff; color: #000000;
-            border: none; padding: 18px; border-radius: 35px; font-size: 16px;
-            font-weight: 800; cursor: pointer; transition: 0.2s;
-        }
-        .withdraw-btn:active { transform: scale(0.96); opacity: 0.8; }
+.grid{
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(64,167,227,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(64,167,227,.08) 1px, transparent 1px);
+    background-size:40px 40px;
+    transform:perspective(900px) rotateX(60deg);
+    transform-origin:top;
+    opacity:.18;
+}
 
-        .status { margin-top: 15px; font-size: 10px; color: #4cd964; display: flex; align-items: center; gap: 6px; font-weight: bold; }
-        .dot { width: 6px; height: 6px; background: #4cd964; border-radius: 50%; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-    </style>
+.panel{
+    width:92%;
+    max-width:420px;
+    background:rgba(7,10,14,.88);
+    border:1px solid rgba(64,167,227,.35);
+    border-radius:26px;
+    padding:24px;
+    position:relative;
+    backdrop-filter:blur(14px);
+    box-shadow:
+        0 0 50px rgba(64,167,227,.12),
+        inset 0 0 20px rgba(64,167,227,.05);
+}
+
+.panel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:26px;
+    padding:1px;
+    background:linear-gradient(135deg,rgba(64,167,227,.6),transparent);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+}
+
+.logo{
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:3px;
+    color:#40a7e3;
+}
+
+.status{
+    font-size:11px;
+    color:#4cd964;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#4cd964;
+    box-shadow:0 0 10px #4cd964;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%,100%{opacity:1}
+    50%{opacity:.3}
+}
+
+.balance-box{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.balance-label{
+    color:#7d93a0;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-size:11px;
+    margin-bottom:8px;
+}
+
+.balance{
+    font-size:54px;
+    font-weight:900;
+    text-shadow:0 0 25px rgba(64,167,227,.35);
+}
+
+.balance span{
+    color:#40a7e3;
+}
+
+.cards{
+    display:grid;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.card{
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:14px;
+}
+
+.card-title{
+    font-size:11px;
+    color:#40a7e3;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:10px;
+}
+
+.metric{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    font-size:13px;
+}
+
+.metric:last-child{
+    margin-bottom:0;
+}
+
+.bar{
+    width:100%;
+    height:8px;
+    border-radius:20px;
+    background:#0d1318;
+    overflow:hidden;
+}
+
+.bar-fill{
+    height:100%;
+    width:68%;
+    background:linear-gradient(90deg,#40a7e3,#7de2ff);
+    box-shadow:0 0 18px rgba(64,167,227,.5);
+    animation:move 3s infinite linear;
+}
+
+@keyframes move{
+    0%{filter:hue-rotate(0deg)}
+    100%{filter:hue-rotate(20deg)}
+}
+
+.logs{
+    height:120px;
+    overflow:hidden;
+    font-family:monospace;
+    font-size:11px;
+    color:#8fdfff;
+    line-height:1.7;
+}
+
+.log-line{
+    opacity:.85;
+    animation:flicker .4s;
+}
+
+@keyframes flicker{
+    from{opacity:0;transform:translateY(6px)}
+    to{opacity:.85;transform:none}
+}
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:18px;
+}
+
+button{
+    border:none;
+    cursor:pointer;
+    padding:15px;
+    border-radius:16px;
+    font-weight:800;
+    transition:.2s;
+}
+
+button:active{
+    transform:scale(.96);
+}
+
+.primary{
+    background:#40a7e3;
+    color:#fff;
+    box-shadow:0 0 20px rgba(64,167,227,.3);
+}
+
+.secondary{
+    background:#0f1317;
+    color:#cfefff;
+    border:1px solid rgba(64,167,227,.25);
+}
+
+.footer{
+    margin-top:18px;
+    text-align:center;
+    color:#5f717c;
+    font-size:10px;
+    letter-spacing:1px;
+}
+
+.scanline{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(to bottom,transparent 50%,rgba(255,255,255,.02) 51%);
+    background-size:100% 4px;
+    mix-blend-mode:soft-light;
+}
+
+</style>
 </head>
 <body>
 
-    <div class="balance-container">
-        <div class="label-top">Total Profit Pool</div>
-        <div class="balance-value">
-            <span class="currency">$</span><span id="balance">0.00</span>
-        </div>
+<div class="grid"></div>
+<div class="scanline"></div>
+
+<div class="panel">
+
+    <div class="top">
+        <div class="logo">HACKPACK</div>
+
         <div class="status">
-            <div class="dot"></div> PROTOCOL LIVE
+            <div class="dot"></div>
+            SYSTEM ONLINE
         </div>
     </div>
 
-    <div class="tasks-box">
-        <div class="task-item">
-            <div style="font-size: 12px; color: #eee;"><b>Step 1:</b> Join Official Channel</div>
-            <a href="https://t.me/hackpackposter" class="task-btn" onclick="playClickSound()">JOIN</a>
+    <div class="balance-box">
+        <div class="balance-label">Network Processing Power</div>
+        <div class="balance"><span>⟠</span><span id="power">0</span></div>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-title">GPU Cluster</div>
+
+            <div class="metric">
+                <span>Temperature</span>
+                <span id="temp">61°C</span>
+            </div>
+
+            <div class="metric">
+                <span>Load</span>
+                <span id="load">68%</span>
+            </div>
+
+            <div class="bar">
+                <div class="bar-fill"></div>
+            </div>
         </div>
-    </div>
 
-    <div class="tasks-box">
-        <div class="task-item">
-            <div style="font-size: 12px; color: #eee;"><b>Ref System:</b> Friends Invited (<span id="ref-count">0</span>)</div>
-            <button class="task-btn" onclick="copyRefLink()">INVITE</button>
+        <div class="card">
+            <div class="card-title">Live Terminal Feed</div>
+            <div class="logs" id="logs"></div>
         </div>
+
     </div>
 
-    <div class="input-group">
-        <div class="input-label">Enter TG Wallet</div>
-        <input type="text" id="wallet" placeholder="UQAr9x... or @username">
+    <div class="actions">
+        <button class="primary" onclick="boost()">BOOST NODE</button>
+        <button class="secondary" onclick="clearLogs()">CLEAR LOGS</button>
     </div>
 
-    <div class="input-group">
-        <div class="input-label">Security Password</div>
-        <input type="password" id="password" placeholder="••••••••">
+    <div class="footer">
+        CYBERDECK INTERFACE // NO REAL CRYPTO OPERATIONS
     </div>
 
-    <button class="withdraw-btn" onclick="processWithdraw()">WITHDRAW NOW</button>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#000000');
+<script>
+const tg = window.Telegram.WebApp;
+try{
+    tg.expand();
+    tg.setHeaderColor('#000000');
+}catch(e){}
 
-        // Инициализация аудио-контекста
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = AudioContext ? new AudioContext() : null;
+const logs = document.getElementById('logs');
+const power = document.getElementById('power');
+const temp = document.getElementById('temp');
+const load = document.getElementById('load');
 
-        // Генератор звуков на коде (Web Audio API)
-        function playTone(freq, type, duration, volume) {
-            if (!audioCtx) return;
-            try {
-                // Возобновляем контекст, если он спал (требование браузеров)
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) { console.log(e); }
-        }
+let powerValue = 0;
 
-        // Звук тиканья баланса (короткий мягкий клик)
-        function playTickSound() {
-            playTone(800, 'sine', 0.03, 0.05);
-        }
+const fakeLogs = [
+    'NODE_04 > packet stream synchronized',
+    'GPU_CLUSTER > neural relay stable',
+    'CORE > entropy calibration complete',
+    'SYSTEM > encrypted tunnel established',
+    'AI_MODULE > response latency 12ms',
+    'NETWATCH > traffic spike detected',
+    'SIGNAL > uplink refreshed',
+    'MEMORY > cache cleaned successfully',
+    'CYBERDECK > passive scan enabled',
+    'PROXY > route switched automatically'
+];
 
-        // Звук клика по кнопкам
-        function playClickSound() {
-            playTone(600, 'triangle', 0.08, 0.2);
-        }
+function addLog(){
+    const div = document.createElement('div');
+    div.className = 'log-line';
 
-        // Звук ошибки / предупреждения
-        function playErrorSound() {
-            if (!audioCtx) return;
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                playTone(150, 'sawtooth', 0.15, 0.3);
-                setTimeout(() => playTone(120, 'sawtooth', 0.2, 0.3), 100);
-            } catch(e){}
-        }
+    const text = fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
+    const time = new Date().toLocaleTimeString();
 
-        // Звук успешного действия или открытия поп-апа
-        function playSuccessSound() {
-            if (!audioCtx) return;
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                playTone(523.25, 'sine', 0.1, 0.2); // Нота До
-                setTimeout(() => playTone(659.25, 'sine', 0.1, 0.2), 80); // Нота Ми
-                setTimeout(() => playTone(783.99, 'sine', 0.2, 0.2), 160); // Нота Соль
-            } catch(e){}
-        }
+    div.textContent = '[' + time + '] ' + text;
 
-        // Восстановление баланса из памяти
-        let balance = parseFloat(localStorage.getItem('terminal_balance') || '0.00');
-        let isDead = false;
-        const balanceDisplay = document.getElementById('balance');
-        const refCountDisplay = document.getElementById('ref-count');
+    logs.prepend(div);
 
-        // Инициализация счетчика рефералов
-        let refCount = parseInt(localStorage.getItem('ref_clicks') || '0');
-        refCountDisplay.innerText = refCount;
+    while(logs.children.length > 8){
+        logs.removeChild(logs.lastChild);
+    }
+}
 
-        const startParam = tg.initDataUnsafe?.start_param || "";
-        if (startParam.startsWith('ref_')) {
-            if (!localStorage.getItem('ref_registered')) {
-                refCount += 1;
-                localStorage.setItem('ref_clicks', refCount);
-                localStorage.setItem('ref_registered', 'true');
-                refCountDisplay.innerText = refCount;
-            }
-        }
+function updateStats(){
+    powerValue += Math.random() * 8;
 
-        // Цикл майнинга с озвучкой
-        function mine() {
-            if (isDead) return;
-            balance += Math.random() * 0.18; 
-            
-            // Запись в память устройства
-            localStorage.setItem('terminal_balance', balance.toFixed(2));
+    power.textContent = Math.floor(powerValue).toLocaleString();
 
-            balanceDisplay.innerText = balance.toLocaleString('en-US', {
-                minimumFractionDigits: 2, maximumFractionDigits: 2
-            });
+    temp.textContent = (58 + Math.floor(Math.random()*9)) + '°C';
+    load.textContent = (62 + Math.floor(Math.random()*18)) + '%';
+}
 
-            // Каждые несколько тиков делаем легкий звук набора цифр
-            if (Math.random() > 0.6) {
-                playTickSound();
-            }
-        }
-        setInterval(mine, 100);
+function boost(){
+    powerValue += 250;
+    addLog();
 
-        function copyRefLink() {
-            playClickSound();
-            const userId = tg.initDataUnsafe?.user?.id || "1473585452";
-            const botLink = "https://t.me/moneylan_bot/hackpack?startapp=ref_" + userId; 
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(botLink).then(() => {
-                    tg.showAlert("🔗 Referral link copied to clipboard!");
-                }).catch(() => {
-                    tg.showAlert("Link: " + botLink);
-                });
-            } else {
-                tg.showAlert("Link: " + botLink);
-            }
-        }
+    try{
+        tg.showAlert('Node boost complete. Performance increased.');
+    }catch(e){
+        alert('Node boost complete.');
+    }
+}
 
-        function processWithdraw() {
-            const wallet = document.getElementById('wallet').value.trim();
-            const pass = document.getElementById('password').value;
+function clearLogs(){
+    logs.innerHTML = '';
+    addLog();
+}
 
-            if (pass === "hackpack1977") {
-                playErrorSound();
-                isDead = true; balance = 0.00; 
-                localStorage.setItem('terminal_balance', '0.00');
-                balanceDisplay.innerText = "0.00";
-                tg.showAlert("🛑 Security Breach: Account Reset.");
-                return;
-            }
+setInterval(addLog,1200);
+setInterval(updateStats,300);
 
-            if (!wallet) {
-                playErrorSound();
-                tg.showAlert("⚠️ Please enter your TG Wallet address first.");
-                return;
-            }
+for(let i=0;i<5;i++){
+    addLog();
+}
 
-            // Минимальная валидация кошелька (длина или юзернейм)
-            if (wallet.length < 5) {
-                playErrorSound();
-                tg.showAlert("⚠️ Invalid address. Please check your TG Wallet details.");
-                return;
-            }
+</script>
 
-            playSuccessSound();
-            tg.showPopup({
-                title: 'Verification Required',
-                message: 'To verify your wallet, send 1 TON to the address below:\n\nUQBAtQa96SBwjfTpuiDAphf065OvEr1W78JUrL1U8X3-J9Mw\n\nAfter payment, click "Check Payment".',
-                buttons: [
-                    {id: 'check', type: 'default', text: 'Check Payment'},
-                    {id: 'cancel', type: 'destructive', text: 'Cancel'}
-                ]
-            }, function(id) {
-                if (id === 'check') {
-                    playErrorSound();
-                    tg.showAlert("❌ Payment not found. Verification takes 5-15 minutes. Please try again later.");
-                } else {
-                    playClickSound();
-                }
-            });
-        }
-    </script>
 </body>
 </html>
+```
+
+Что изменилось:
+
+* убран fake withdraw/scam UX
+* стиль стал как cyberdeck terminal
+* добавлены fake system logs
+* GPU metrics
+* sci‑fi сетка и scanlines
+* нет подозрительных TON-переводов
+* интерфейс выглядит как HUD, а не как развод
