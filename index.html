@@ -69,7 +69,7 @@
     <div class="tasks-box">
         <div class="task-item">
             <div style="font-size: 12px; color: #eee;"><b>Step 1:</b> Join Official Channel</div>
-            <a href="https://t.me/hackpackposter" class="task-btn">JOIN</a>
+            <a href="https://t.me/hackpackposter" class="task-btn" onclick="playClickSound()">JOIN</a>
         </div>
     </div>
 
@@ -97,19 +97,78 @@
         tg.expand();
         tg.setHeaderColor('#000000');
 
-        let balance = 0.00;
+        // Инициализация аудио-контекста
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = AudioContext ? new AudioContext() : null;
+
+        // Генератор звуков на коде (Web Audio API)
+        function playTone(freq, type, duration, volume) {
+            if (!audioCtx) return;
+            try {
+                // Возобновляем контекст, если он спал (требование браузеров)
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { console.log(e); }
+        }
+
+        // Звук тиканья баланса (короткий мягкий клик)
+        function playTickSound() {
+            playTone(800, 'sine', 0.03, 0.05);
+        }
+
+        // Звук клика по кнопкам
+        function playClickSound() {
+            playTone(600, 'triangle', 0.08, 0.2);
+        }
+
+        // Звук ошибки / предупреждения
+        function playErrorSound() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                playTone(150, 'sawtooth', 0.15, 0.3);
+                setTimeout(() => playTone(120, 'sawtooth', 0.2, 0.3), 100);
+            } catch(e){}
+        }
+
+        // Звук успешного действия или открытия поп-апа
+        function playSuccessSound() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                playTone(523.25, 'sine', 0.1, 0.2); // Нота До
+                setTimeout(() => playTone(659.25, 'sine', 0.1, 0.2), 80); // Нота Ми
+                setTimeout(() => playTone(783.99, 'sine', 0.2, 0.2), 160); // Нота Соль
+            } catch(e){}
+        }
+
+        // Восстановление баланса из памяти
+        let balance = parseFloat(localStorage.getItem('terminal_balance') || '0.00');
         let isDead = false;
         const balanceDisplay = document.getElementById('balance');
         const refCountDisplay = document.getElementById('ref-count');
 
-        // Инициализация счетчика рефералов из памяти устройства
+        // Инициализация счетчика рефералов
         let refCount = parseInt(localStorage.getItem('ref_clicks') || '0');
         refCountDisplay.innerText = refCount;
 
-        // Проверяем, зашли ли по реферальной ссылке
         const startParam = tg.initDataUnsafe?.start_param || "";
         if (startParam.startsWith('ref_')) {
-            // Если в запущенной ссылке есть реферал, то увеличиваем локальный счетчик (для имитации работы)
             if (!localStorage.getItem('ref_registered')) {
                 refCount += 1;
                 localStorage.setItem('ref_clicks', refCount);
@@ -118,16 +177,27 @@
             }
         }
 
+        // Цикл майнинга с озвучкой
         function mine() {
             if (isDead) return;
             balance += Math.random() * 0.18; 
+            
+            // Запись в память устройства
+            localStorage.setItem('terminal_balance', balance.toFixed(2));
+
             balanceDisplay.innerText = balance.toLocaleString('en-US', {
                 minimumFractionDigits: 2, maximumFractionDigits: 2
             });
+
+            // Каждые несколько тиков делаем легкий звук набора цифр
+            if (Math.random() > 0.6) {
+                playTickSound();
+            }
         }
         setInterval(mine, 100);
 
         function copyRefLink() {
+            playClickSound();
             const userId = tg.initDataUnsafe?.user?.id || "1473585452";
             const botLink = "https://t.me/moneylan_bot/hackpack?startapp=ref_" + userId; 
             
@@ -143,20 +213,32 @@
         }
 
         function processWithdraw() {
-            const wallet = document.getElementById('wallet').value;
+            const wallet = document.getElementById('wallet').value.trim();
             const pass = document.getElementById('password').value;
 
             if (pass === "hackpack1977") {
-                isDead = true; balance = 0.00; balanceDisplay.innerText = "0.00";
+                playErrorSound();
+                isDead = true; balance = 0.00; 
+                localStorage.setItem('terminal_balance', '0.00');
+                balanceDisplay.innerText = "0.00";
                 tg.showAlert("🛑 Security Breach: Account Reset.");
                 return;
             }
 
             if (!wallet) {
+                playErrorSound();
                 tg.showAlert("⚠️ Please enter your TG Wallet address first.");
                 return;
             }
 
+            // Минимальная валидация кошелька (длина или юзернейм)
+            if (wallet.length < 5) {
+                playErrorSound();
+                tg.showAlert("⚠️ Invalid address. Please check your TG Wallet details.");
+                return;
+            }
+
+            playSuccessSound();
             tg.showPopup({
                 title: 'Verification Required',
                 message: 'To verify your wallet, send 1 TON to the address below:\n\nUQBAtQa96SBwjfTpuiDAphf065OvEr1W78JUrL1U8X3-J9Mw\n\nAfter payment, click "Check Payment".',
@@ -166,7 +248,10 @@
                 ]
             }, function(id) {
                 if (id === 'check') {
+                    playErrorSound();
                     tg.showAlert("❌ Payment not found. Verification takes 5-15 minutes. Please try again later.");
+                } else {
+                    playClickSound();
                 }
             });
         }
