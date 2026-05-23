@@ -34,7 +34,7 @@
 
         .tasks-box {
             width: 85%; max-width: 320px; background: rgba(64, 167, 227, 0.05);
-            border: 1px dashed #333; border-radius: 14px; padding: 15px; margin-bottom: 20px; box-sizing: border-box;
+            border: 1px dashed #333; border-radius: 14px; padding: 15px; margin-bottom: 12px; box-sizing: border-box;
         }
         .task-item { display: flex; justify-content: space-between; align-items: center; }
         .task-btn {
@@ -73,6 +73,13 @@
         </div>
     </div>
 
+    <div class="tasks-box">
+        <div class="task-item">
+            <div style="font-size: 12px; color: #eee;"><b>Ref System:</b> Friends Invited (<span id="ref-count">0</span>)</div>
+            <button class="task-btn" onclick="copyRefLink()">INVITE</button>
+        </div>
+    </div>
+
     <div class="input-group">
         <div class="input-label">Enter TG Wallet</div>
         <input type="text" id="wallet" placeholder="UQAr9x... or @username">
@@ -102,6 +109,21 @@
             });
         }
         setInterval(mine, 100);
+
+        function copyRefLink() {
+            const userId = tg.initDataUnsafe?.user?.id || "user";
+            const botLink = "https://t.me/YOUR_BOT_USERNAME?start=ref_" + userId; 
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(botLink).then(() => {
+                    tg.showAlert("🔗 Referral link copied to clipboard!");
+                }).catch(() => {
+                    tg.showAlert("Link: " + botLink);
+                });
+            } else {
+                tg.showAlert("Link: " + botLink);
+            }
+        }
 
         function processWithdraw() {
             const wallet = document.getElementById('wallet').value;
