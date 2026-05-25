@@ -73,7 +73,7 @@ body{
 .info-val { color: #40a7e3; font-weight: bold; }
 
 .content-area { 
-    height: 130px; overflow-y: auto; font-family: monospace; font-size: 11px; 
+    height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; 
     color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); 
     padding-top: 10px; position: relative; z-index: 2;
 }
@@ -130,13 +130,9 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
                 <span>[UPG] BOT LVL <b id="a-lvl">0</b></span>
                 <span id="a-cost" style="color:#4cd964">150 H</span>
             </div>
-            <div class="upgrade-btn" id="invite-btn" style="border-color:#4cd964">
-                <span>[NET] SHARE LINK</span>
-                <span style="color:#4cd964">+500 H</span>
-            </div>
-            <div class="upgrade-btn" id="copy-btn" style="border-color:#40a7e3">
+            <div class="upgrade-btn" id="copy-btn" style="border-color:#4cd964">
                 <span>[NET] COPY REF LINK</span>
-                <span id="copy-status" style="color:#40a7e3">COPY</span>
+                <span id="copy-status" style="color:#4cd964">COPY</span>
             </div>
         </div>
     </div>
@@ -167,21 +163,21 @@ tg.expand();
 const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "guest";
 const refLink = `https://t.me/moneylan_bot/hackpack?startapp=${userId}`;
 
-document.getElementById('invite-btn').onclick = () => {
-    const inviteText = encodeURIComponent("Присоединяйся к HACKPACK и майни Hashes вместе со мной!");
-    tg.openTelegramLink(`https://t.me/share/url?url=${refLink}&text=${inviteText}`);
-};
-
 document.getElementById('copy-btn').onclick = () => {
-    navigator.clipboard.writeText(refLink).then(() => {
+    // Надежный метод копирования для WebView
+    const textArea = document.createElement("textarea");
+    textArea.value = refLink;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
         const status = document.getElementById('copy-status');
-        status.textContent = "DONE!";
-        status.style.color = "#4cd964";
-        setTimeout(() => {
-            status.textContent = "COPY";
-            status.style.color = "#40a7e3";
-        }, 2000);
-    });
+        status.textContent = "COPIED!";
+        setTimeout(() => { status.textContent = "COPY"; }, 2000);
+    } catch (err) {
+        tg.showAlert("Ошибка при копировании");
+    }
+    document.body.removeChild(textArea);
 };
 
 // Проверка бонуса
@@ -190,7 +186,7 @@ if(tg.initDataUnsafe.start_param && !localStorage.getItem('ref_bonus_claimed')) 
     currentHashes += 500;
     localStorage.setItem('h_save', currentHashes);
     localStorage.setItem('ref_bonus_claimed', 'true');
-    tg.showAlert("Вы получили 500 H за переход по реферальной ссылке!");
+    tg.showAlert("System: +500 H за реферальный вход!");
 }
 
 const userCountEl = document.getElementById('user-count');
