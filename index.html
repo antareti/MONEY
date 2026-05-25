@@ -55,14 +55,16 @@ body{
 
 .panel {
     width: 92%; max-width: 400px;
-    background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8));
+    /* ВОЗВРАЩАЕМ ФОН ВНУТРЬ ПАНЕЛИ */
+    background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8)), url('ao.png');
     background-size: cover;
     background-position: center;
+    
     border: 1px solid rgba(64, 167, 227, 0.4);
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
     backdrop-filter: blur(8px);
-    overflow: hidden;
+    overflow: hidden; 
     box-shadow: 0 10px 50px rgba(0,0,0,0.8);
 }
 
@@ -237,7 +239,7 @@ document.getElementById('mine-btn').onclick = () => {
     hashes += clickLvl;
     addLog(`Decrypted +${clickLvl} H`);
     updateUI();
-    // Спавним 2-3 монетки за клик для эффекта
+    
     for(let i=0; i<3; i++) {
         setTimeout(spawnCoin, i * 100);
     }
@@ -274,7 +276,6 @@ setInterval(() => {
     if(autoLvl > 0) { 
         hashes += (autoLvl * 2) / 10; 
         updateUI(); 
-        // Если работает бот, монетки падают редко сами по себе
         if(Math.random() > 0.95) spawnCoin();
     } 
 }, 100);
