@@ -10,7 +10,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <style>
-/* СТИЛИ */
 *{
     margin:0; padding:0; box-sizing:border-box;
     user-select: none; -webkit-tap-highlight-color: transparent;
@@ -55,20 +54,14 @@ body{
 .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
 .info-val { color: #40a7e3; font-weight: bold; }
 
-.content-area { height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); padding-top: 10px; }
+.content-area { height: 160px; overflow: hidden; font-family: monospace; font-size: 11px; color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); padding-top: 10px; }
 
-/* СТИЛИ ДЛЯ ПОЛЯ ПАРОЛЯ */
-.promo-box {
-    display: flex; gap: 5px; margin-top: 10px;
-}
+.promo-box { display: flex; gap: 5px; margin-bottom: 10px; }
 .promo-input {
     flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(64,167,227,0.3);
-    border-radius: 10px; padding: 8px; color: #fff; font-family: monospace; outline: none;
+    border-radius: 10px; padding: 10px; color: #fff; outline: none; font-size: 12px;
 }
-.promo-btn {
-    background: #4cd964; color: #000; border: none; border-radius: 10px;
-    padding: 0 15px; font-weight: bold; cursor: pointer;
-}
+.promo-btn { background: #40a7e3; color: #fff; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold; }
 
 .upgrade-btn {
     display: flex; justify-content: space-between;
@@ -114,8 +107,12 @@ button:active { transform: scale(0.96); }
                 <span>[UPG] BOT LVL <b id="a-lvl">0</b></span>
                 <span id="a-cost" style="color:#4cd964">150 H</span>
             </div>
+            <div class="upgrade-btn" id="copy-ref-btn" style="border-color:#4cd964">
+                <span>[NET] COPY REF LINK</span>
+                <span id="copy-status" style="color:#4cd964">COPY</span>
+            </div>
             <div class="promo-box">
-                <input type="text" id="promo-input" class="promo-input" placeholder="ENTER ACCESS CODE...">
+                <input type="password" id="promo-input" class="promo-input" placeholder="ENTER ACCESS CODE...">
                 <button id="promo-btn" class="promo-btn">OK</button>
             </div>
         </div>
@@ -148,24 +145,49 @@ let clickLvl = parseInt(localStorage.getItem('c_lvl_save') || '1');
 let autoLvl = parseInt(localStorage.getItem('a_lvl_save') || '0');
 let inShop = false;
 
-// ЛОГИКА ПАРОЛЯ
+// 1. РЕФЕРАЛЬНАЯ СИСТЕМА
+const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "guest";
+const refLink = `https://t.me/moneylan_bot/hackpack?startapp=${userId}`;
+
+document.getElementById('copy-ref-btn').onclick = function() {
+    const el = document.createElement('textarea');
+    el.value = refLink;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    
+    const status = document.getElementById('copy-status');
+    status.textContent = "DONE!";
+    setTimeout(() => { status.textContent = "COPY"; }, 2000);
+    tg.HapticFeedback.notificationOccurred('success');
+};
+
+if(tg.initDataUnsafe.start_param && !localStorage.getItem('ref_claimed')) {
+    hashes += 500;
+    localStorage.setItem('ref_claimed', 'true');
+    tg.showAlert("Welcome! +500 Hashes for referral entry.");
+}
+
+// 2. СКРЫТЫЙ ПАРОЛЬ hackpack1977
 document.getElementById('promo-btn').onclick = () => {
-    const code = document.getElementById('promo-input').value;
-    if(code === 'hackpack1977') {
-        if(!localStorage.getItem('promo_claimed')) {
+    const val = document.getElementById('promo-input').value;
+    if(val === 'hackpack1977') {
+        if(!localStorage.getItem('p_1977')) {
             hashes += 1000000;
-            localStorage.setItem('promo_claimed', 'true');
-            tg.showAlert("ACCESS GRANTED: +1,000,000 HASHES!");
+            localStorage.setItem('p_1977', 'true');
+            tg.showAlert("SYSTEM OVERRIDE: +1,000,000 HASHES!");
             updateUI();
         } else {
-            tg.showAlert("ERROR: Code already used.");
+            tg.showAlert("Access denied: Code used.");
         }
     } else {
-        tg.showAlert("ERROR: Invalid access code.");
+        tg.showAlert("Invalid encryption key.");
     }
     document.getElementById('promo-input').value = '';
 };
 
+// 3. ИГРОВАЯ ЛОГИКА
 function updateUI() {
     document.getElementById('hashes-val').textContent = Math.floor(hashes).toLocaleString();
     document.getElementById('rate-val').textContent = (autoLvl * 2) + ' H/s';
@@ -213,13 +235,13 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-// Счетчик онлайн (имитация для примера)
-setInterval(() => {
-    document.getElementById('user-count').textContent = Math.floor(Math.random() * (1500 - 1400) + 1400);
-}, 3000);
+// Firebase Online
+const presenceRef = db.ref('presence');
+const myPresenceRef = presenceRef.push();
+db.ref('.info/connected').on('value', (s) => { if(s.val()) { myPresenceRef.onDisconnect().remove(); myPresenceRef.set(true); } });
+presenceRef.on('value', (s) => { document.getElementById('user-count').textContent = s.numChildren() || 1; });
 
 setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
-
 updateUI();
 </script>
 </body>
