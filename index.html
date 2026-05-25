@@ -17,12 +17,32 @@
 }
 
 body{
-    background:#020202; /* Возвращаем темный фон для страницы */
+    background:#020202; 
     color:#d9f7ff;
     font-family: 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh; display: flex;
     align-items: center; justify-content: center;
     overflow: hidden;
+}
+
+/* АНИМАЦИЯ ПАДАЮЩИХ МОНЕТ */
+.coin {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: #40a7e3;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px #40a7e3, 0 0 20px #40a7e3;
+    top: -10px;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
 }
 
 .background-fx { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
@@ -35,20 +55,17 @@ body{
 
 .panel {
     width: 92%; max-width: 400px;
-    /* УСТАНАВЛИВАЕМ ФОН ВНУТРЬ ПАНЕЛИ */
-    background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8)), url('ao.png');
+    background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8));
     background-size: cover;
     background-position: center;
-    
     border: 1px solid rgba(64, 167, 227, 0.4);
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
     backdrop-filter: blur(8px);
-    overflow: hidden; /* Чтобы фон не вылезал за скругленные углы */
+    overflow: hidden;
     box-shadow: 0 10px 50px rgba(0,0,0,0.8);
 }
 
-/* Добавим легкое свечение поверх контента для читаемости */
 .panel::before {
     content: '';
     position: absolute; inset: 0;
@@ -202,10 +219,28 @@ function updateUI() {
     localStorage.setItem('a_lvl_save', autoLvl);
 }
 
+// ФУНКЦИЯ ДЛЯ СОЗДАНИЯ МОНЕТ
+function spawnCoin() {
+    const coin = document.createElement('div');
+    coin.className = 'coin';
+    coin.style.left = Math.random() * 100 + 'vw';
+    const duration = Math.random() * 2 + 1;
+    coin.style.animation = `fall ${duration}s linear forwards`;
+    document.body.appendChild(coin);
+    
+    setTimeout(() => {
+        coin.remove();
+    }, duration * 1000);
+}
+
 document.getElementById('mine-btn').onclick = () => {
     hashes += clickLvl;
     addLog(`Decrypted +${clickLvl} H`);
     updateUI();
+    // Спавним 2-3 монетки за клик для эффекта
+    for(let i=0; i<3; i++) {
+        setTimeout(spawnCoin, i * 100);
+    }
 };
 
 document.getElementById('shop-btn').onclick = () => {
@@ -235,7 +270,14 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
+setInterval(() => { 
+    if(autoLvl > 0) { 
+        hashes += (autoLvl * 2) / 10; 
+        updateUI(); 
+        // Если работает бот, монетки падают редко сами по себе
+        if(Math.random() > 0.95) spawnCoin();
+    } 
+}, 100);
 
 updateUI();
 </script>
