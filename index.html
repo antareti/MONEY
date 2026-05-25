@@ -17,7 +17,12 @@
 }
 
 body{
-    background:#020202; color:#d9f7ff;
+    /* Добавлен фон ao.png с затемнением для читаемости */
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('ao.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color:#d9f7ff;
     font-family: 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh; display: flex;
     align-items: center; justify-content: center;
@@ -29,16 +34,17 @@ body{
     position: absolute; inset: 0;
     background-image: linear-gradient(rgba(64,167,227,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(64,167,227,.05) 1px, transparent 1px);
     background-size: 30px 30px; transform: perspective(500px) rotateX(60deg);
-    transform-origin: top; opacity: 0.5;
+    transform-origin: top; opacity: 0.3; /* Уменьшил прозрачность сетки, чтобы не перебивала картинку */
 }
 
 .panel {
     width: 92%; max-width: 400px;
-    background: rgba(7, 10, 14, 0.95);
+    background: rgba(7, 10, 14, 0.85); /* Чуть больше прозрачности для эффекта стекла */
     border: 1px solid rgba(64, 167, 227, 0.4);
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
 .top-bar {
@@ -55,7 +61,7 @@ body{
 .balance span { color: #40a7e3; }
 
 .info-box {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
     border-radius: 16px; padding: 15px; margin-bottom: 15px;
 }
 .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
@@ -129,7 +135,6 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
 const firebaseConfig = {
   apiKey: "AIzaSyAI5Jz37Zs8ggO_5QLXTYU5QR9geh0wpHM",
   authDomain: "games-hackpack.firebaseapp.com",
-  // ВАЖНО: databaseURL обычно выглядит так для Firebase
   databaseURL: "https://games-hackpack-default-rtdb.firebaseio.com", 
   projectId: "games-hackpack",
   storageBucket: "games-hackpack.firebasestorage.app",
@@ -146,7 +151,6 @@ const userCountEl = document.getElementById('user-count');
 const presenceRef = db.ref('presence');
 const myPresenceRef = presenceRef.push();
 
-// Логика подключения/отключения
 db.ref('.info/connected').on('value', (snap) => {
     if (snap.val() === true) {
         myPresenceRef.onDisconnect().remove();
@@ -154,7 +158,6 @@ db.ref('.info/connected').on('value', (snap) => {
     }
 });
 
-// Обновление цифры на экране
 presenceRef.on('value', (snap) => {
     userCountEl.textContent = snap.numChildren() || 1;
 });
@@ -215,7 +218,6 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-// Доход 10 раз в секунду для плавности
 setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
 
 updateUI();
