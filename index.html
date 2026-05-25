@@ -17,8 +17,7 @@
 }
 
 body{
-    background:#020202; 
-    color:#d9f7ff;
+    background:#020202; color:#d9f7ff;
     font-family: 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh; display: flex;
     align-items: center; justify-content: center;
@@ -36,46 +35,39 @@ body{
 .panel {
     width: 92%; max-width: 400px;
     background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8)), url('ao.png');
-    background-size: cover;
-    background-position: center;
+    background-size: cover; background-position: center;
     border: 1px solid rgba(64, 167, 227, 0.4);
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
-    backdrop-filter: blur(8px);
-    overflow: hidden;
+    backdrop-filter: blur(8px); overflow: hidden;
     box-shadow: 0 10px 50px rgba(0,0,0,0.8);
 }
 
-.top-bar {
-    display: flex; justify-content: space-between;
-    margin-bottom: 20px; font-size: 11px; font-weight: bold;
-    position: relative; z-index: 2;
-}
-
+.top-bar { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 11px; font-weight: bold; }
 .status-online { color: #4cd964; display: flex; align-items: center; gap: 5px; }
 .dot { width: 6px; height: 6px; background: #4cd964; border-radius: 50%; box-shadow: 0 0 8px #4cd964; animation: pulse 1.5s infinite; }
-
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-.balance { 
-    font-size: 42px; font-weight: 900; color: #fff; text-align: center; 
-    margin-bottom: 20px; text-shadow: 0 0 15px rgba(64,167,227,0.5);
-    position: relative; z-index: 2;
-}
+.balance { font-size: 42px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(64,167,227,0.5); }
 .balance span { color: #40a7e3; }
 
-.info-box {
-    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px; padding: 15px; margin-bottom: 15px;
-    position: relative; z-index: 2;
-}
+.info-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
 .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
 .info-val { color: #40a7e3; font-weight: bold; }
 
-.content-area { 
-    height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; 
-    color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); 
-    padding-top: 10px; position: relative; z-index: 2;
+.content-area { height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); padding-top: 10px; }
+
+/* СТИЛИ ДЛЯ ПОЛЯ ПАРОЛЯ */
+.promo-box {
+    display: flex; gap: 5px; margin-top: 10px;
+}
+.promo-input {
+    flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(64,167,227,0.3);
+    border-radius: 10px; padding: 8px; color: #fff; font-family: monospace; outline: none;
+}
+.promo-btn {
+    background: #4cd964; color: #000; border: none; border-radius: 10px;
+    padding: 0 15px; font-weight: bold; cursor: pointer;
 }
 
 .upgrade-btn {
@@ -86,17 +78,12 @@ body{
 }
 
 .actions { display: grid; gap: 10px; position: relative; z-index: 100; }
-button {
-    padding: 18px; border-radius: 16px; border: none;
-    font-weight: 800; font-size: 15px; cursor: pointer;
-    transition: 0.1s; touch-action: manipulation;
-}
-button:active { transform: scale(0.96); filter: brightness(1.2); }
+button { padding: 18px; border-radius: 16px; border: none; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.1s; }
+button:active { transform: scale(0.96); }
 
 .btn-mine { background: #40a7e3; color: #fff; box-shadow: 0 4px 15px rgba(64,167,227,0.4); }
 .btn-shop { background: rgba(22, 27, 34, 0.8); color: #40a7e3; border: 1px solid #40a7e3; }
-.log-entry { margin-bottom: 3px; opacity: 0.9; text-shadow: 1px 1px 2px #000; }
-#online-count-glow { text-shadow: 0 0 10px #4cd964; }
+.log-entry { margin-bottom: 3px; opacity: 0.9; }
 </style>
 </head>
 <body>
@@ -106,10 +93,7 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
 <div class="panel">
     <div class="top-bar">
         <span>CYBERDECK v1.2</span>
-        <div class="status-online">
-            <div class="dot"></div>
-            ONLINE: <span id="user-count">0</span>
-        </div>
+        <div class="status-online"><div class="dot"></div> ONLINE: <span id="user-count">0</span></div>
     </div>
 
     <div class="balance"><span>⟠</span> <span id="hashes-val">0</span></div>
@@ -130,9 +114,9 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
                 <span>[UPG] BOT LVL <b id="a-lvl">0</b></span>
                 <span id="a-cost" style="color:#4cd964">150 H</span>
             </div>
-            <div class="upgrade-btn" id="copy-btn" style="border-color:#4cd964">
-                <span>[NET] COPY REF LINK</span>
-                <span id="copy-status" style="color:#4cd964">COPY</span>
+            <div class="promo-box">
+                <input type="text" id="promo-input" class="promo-input" placeholder="ENTER ACCESS CODE...">
+                <button id="promo-btn" class="promo-btn">OK</button>
             </div>
         </div>
     </div>
@@ -159,51 +143,28 @@ const db = firebase.database();
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// РЕФЕРАЛЬНАЯ ЛОГИКА
-const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "guest";
-const refLink = `https://t.me/moneylan_bot/hackpack?startapp=${userId}`;
-
-document.getElementById('copy-btn').onclick = () => {
-    // Надежный метод копирования для WebView
-    const textArea = document.createElement("textarea");
-    textArea.value = refLink;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-        document.execCommand('copy');
-        const status = document.getElementById('copy-status');
-        status.textContent = "COPIED!";
-        setTimeout(() => { status.textContent = "COPY"; }, 2000);
-    } catch (err) {
-        tg.showAlert("Ошибка при копировании");
-    }
-    document.body.removeChild(textArea);
-};
-
-// Проверка бонуса
-if(tg.initDataUnsafe.start_param && !localStorage.getItem('ref_bonus_claimed')) {
-    let currentHashes = parseFloat(localStorage.getItem('h_save') || '0');
-    currentHashes += 500;
-    localStorage.setItem('h_save', currentHashes);
-    localStorage.setItem('ref_bonus_claimed', 'true');
-    tg.showAlert("System: +500 H за реферальный вход!");
-}
-
-const userCountEl = document.getElementById('user-count');
-const presenceRef = db.ref('presence');
-const myPresenceRef = presenceRef.push();
-
-db.ref('.info/connected').on('value', (snap) => {
-    if (snap.val() === true) {
-        myPresenceRef.onDisconnect().remove();
-        myPresenceRef.set(true);
-    }
-});
-
 let hashes = parseFloat(localStorage.getItem('h_save') || '0');
 let clickLvl = parseInt(localStorage.getItem('c_lvl_save') || '1');
 let autoLvl = parseInt(localStorage.getItem('a_lvl_save') || '0');
 let inShop = false;
+
+// ЛОГИКА ПАРОЛЯ
+document.getElementById('promo-btn').onclick = () => {
+    const code = document.getElementById('promo-input').value;
+    if(code === 'hackpack1977') {
+        if(!localStorage.getItem('promo_claimed')) {
+            hashes += 1000000;
+            localStorage.setItem('promo_claimed', 'true');
+            tg.showAlert("ACCESS GRANTED: +1,000,000 HASHES!");
+            updateUI();
+        } else {
+            tg.showAlert("ERROR: Code already used.");
+        }
+    } else {
+        tg.showAlert("ERROR: Invalid access code.");
+    }
+    document.getElementById('promo-input').value = '';
+};
 
 function updateUI() {
     document.getElementById('hashes-val').textContent = Math.floor(hashes).toLocaleString();
@@ -213,7 +174,6 @@ function updateUI() {
     document.getElementById('c-cost').textContent = Math.floor(50 * Math.pow(1.5, clickLvl-1)) + ' H';
     document.getElementById('a-lvl').textContent = autoLvl;
     document.getElementById('a-cost').textContent = Math.floor(150 * Math.pow(1.7, autoLvl)) + ' H';
-    
     localStorage.setItem('h_save', hashes);
     localStorage.setItem('c_lvl_save', clickLvl);
     localStorage.setItem('a_lvl_save', autoLvl);
@@ -223,6 +183,7 @@ document.getElementById('mine-btn').onclick = () => {
     hashes += clickLvl;
     addLog(`Decrypted +${clickLvl} H`);
     updateUI();
+    tg.HapticFeedback.impactOccurred('light');
 };
 
 document.getElementById('shop-btn').onclick = () => {
@@ -252,19 +213,13 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-let simulatedBaseOnline = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
-function updateSimulatedOnline() {
-    let variance = Math.floor(Math.random() * (20 - (-20) + 1)) + (-20);
-    simulatedBaseOnline += variance;
-    if (simulatedBaseOnline < 700) simulatedBaseOnline = 750;
-    if (simulatedBaseOnline > 1500) simulatedBaseOnline = 1450;
-    let formattedOnline = simulatedBaseOnline.toLocaleString('en-US');
-    userCountEl.innerHTML = `<span id="online-count-glow">${formattedOnline}</span>`; 
-}
+// Счетчик онлайн (имитация для примера)
+setInterval(() => {
+    document.getElementById('user-count').textContent = Math.floor(Math.random() * (1500 - 1400) + 1400);
+}, 3000);
 
-updateSimulatedOnline();
-setInterval(updateSimulatedOnline, 2000);
 setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
+
 updateUI();
 </script>
 </body>
