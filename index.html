@@ -17,32 +17,12 @@
 }
 
 body{
-    background:#020202; 
+    background:#020202; /* Темный фон */
     color:#d9f7ff;
     font-family: 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh; display: flex;
     align-items: center; justify-content: center;
     overflow: hidden;
-}
-
-/* АНИМАЦИЯ ПАДАЮЩИХ МОНЕТ */
-.coin {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    background: #40a7e3;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    box-shadow: 0 0 10px #40a7e3, 0 0 20px #40a7e3;
-    top: -10px;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(110vh) rotate(360deg);
-        opacity: 0;
-    }
 }
 
 .background-fx { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
@@ -55,7 +35,7 @@ body{
 
 .panel {
     width: 92%; max-width: 400px;
-    /* ВОЗВРАЩАЕМ ФОН ВНУТРЬ ПАНЕЛИ */
+    /* ФОН ПАНЕЛИ Сao.png */
     background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8)), url('ao.png');
     background-size: cover;
     background-position: center;
@@ -64,7 +44,7 @@ body{
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
     backdrop-filter: blur(8px);
-    overflow: hidden; 
+    overflow: hidden;
     box-shadow: 0 10px 50px rgba(0,0,0,0.8);
 }
 
@@ -126,6 +106,8 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
 .btn-shop { background: rgba(22, 27, 34, 0.8); color: #40a7e3; border: 1px solid #40a7e3; }
 
 .log-entry { margin-bottom: 3px; opacity: 0.9; text-shadow: 1px 1px 2px #000; }
+
+#online-count-glow { text-shadow: 0 0 10px #4cd964; } /* Glow effect for the count */
 </style>
 </head>
 <body>
@@ -221,28 +203,10 @@ function updateUI() {
     localStorage.setItem('a_lvl_save', autoLvl);
 }
 
-// ФУНКЦИЯ ДЛЯ СОЗДАНИЯ МОНЕТ
-function spawnCoin() {
-    const coin = document.createElement('div');
-    coin.className = 'coin';
-    coin.style.left = Math.random() * 100 + 'vw';
-    const duration = Math.random() * 2 + 1;
-    coin.style.animation = `fall ${duration}s linear forwards`;
-    document.body.appendChild(coin);
-    
-    setTimeout(() => {
-        coin.remove();
-    }, duration * 1000);
-}
-
 document.getElementById('mine-btn').onclick = () => {
     hashes += clickLvl;
     addLog(`Decrypted +${clickLvl} H`);
     updateUI();
-    
-    for(let i=0; i<3; i++) {
-        setTimeout(spawnCoin, i * 100);
-    }
 };
 
 document.getElementById('shop-btn').onclick = () => {
@@ -272,13 +236,32 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-setInterval(() => { 
-    if(autoLvl > 0) { 
-        hashes += (autoLvl * 2) / 10; 
-        updateUI(); 
-        if(Math.random() > 0.95) spawnCoin();
-    } 
-}, 100);
+// Simulated dynamic user count logic
+const simulatedUserCountEl = document.getElementById('online-count-glow'); // Re-using a variable name is bad practice; changed.
+let simulatedBaseOnline = Math.floor(Math.random() * (1200 - 800 + 1)) + 800; // Starts around 800-1200
+
+function updateSimulatedOnline() {
+    let variance = Math.floor(Math.random() * (20 - (-20) + 1)) + (-20); // Small variance
+    simulatedBaseOnline += variance;
+    
+    // Bounds to keep it realistic
+    if (simulatedBaseOnline < 700) simulatedBaseOnline = 750;
+    if (simulatedBaseOnline > 1500) simulatedBaseOnline = 1450;
+    
+    // Formatting the number
+    let formattedOnline = simulatedBaseOnline.toLocaleString('en-US', { minimumIntegerDigits: 1, useGrouping: true });
+    
+    // Update the UI element
+    userCountEl.innerHTML = `<span id="online-count-glow">${formattedOnline}</span>`; 
+}
+
+// Initial update
+updateSimulatedOnline();
+
+// Set interval for continuous updates every 2 seconds
+setInterval(updateSimulatedOnline, 2000);
+
+setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
 
 updateUI();
 </script>
