@@ -17,7 +17,7 @@
 }
 
 body{
-    background:#020202; /* Темный фон */
+    background:#020202; 
     color:#d9f7ff;
     font-family: 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh; display: flex;
@@ -35,24 +35,15 @@ body{
 
 .panel {
     width: 92%; max-width: 400px;
-    /* ФОН ПАНЕЛИ Сao.png */
     background: linear-gradient(rgba(7, 10, 14, 0.8), rgba(7, 10, 14, 0.8)), url('ao.png');
     background-size: cover;
     background-position: center;
-    
     border: 1px solid rgba(64, 167, 227, 0.4);
     border-radius: 24px; padding: 20px;
     position: relative; z-index: 10;
     backdrop-filter: blur(8px);
     overflow: hidden;
     box-shadow: 0 10px 50px rgba(0,0,0,0.8);
-}
-
-.panel::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at top, rgba(64,167,227,0.1), transparent);
-    pointer-events: none;
 }
 
 .top-bar {
@@ -104,10 +95,8 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
 
 .btn-mine { background: #40a7e3; color: #fff; box-shadow: 0 4px 15px rgba(64,167,227,0.4); }
 .btn-shop { background: rgba(22, 27, 34, 0.8); color: #40a7e3; border: 1px solid #40a7e3; }
-
 .log-entry { margin-bottom: 3px; opacity: 0.9; text-shadow: 1px 1px 2px #000; }
-
-#online-count-glow { text-shadow: 0 0 10px #4cd964; } /* Glow effect for the count */
+#online-count-glow { text-shadow: 0 0 10px #4cd964; }
 </style>
 </head>
 <body>
@@ -141,6 +130,10 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
                 <span>[UPG] BOT LVL <b id="a-lvl">0</b></span>
                 <span id="a-cost" style="color:#4cd964">150 H</span>
             </div>
+            <div class="upgrade-btn" id="invite-btn" style="border-color:#4cd964">
+                <span>[NET] INVITE FRIENDS</span>
+                <span style="color:#4cd964">+500 H</span>
+            </div>
         </div>
     </div>
 
@@ -151,19 +144,38 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
 </div>
 
 <script>
-// --- КОНФИГУРАЦИЯ FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyAI5Jz37Zs8ggO_5QLXTYU5QR9geh0wpHM",
-  authDomain: "games-hackpack.firebaseapp.com",
-  databaseURL: "https://games-hackpack-default-rtdb.firebaseio.com", 
-  projectId: "games-hackpack",
-  storageBucket: "games-hackpack.firebasestorage.app",
-  messagingSenderId: "765398567944",
-  appId: "1:765398567944:web:0e5f86189f4947187995bd"
+    apiKey: "AIzaSyAI5Jz37Zs8ggO_5QLXTYU5QR9geh0wpHM",
+    authDomain: "games-hackpack.firebaseapp.com",
+    databaseURL: "https://games-hackpack-default-rtdb.firebaseio.com", 
+    projectId: "games-hackpack",
+    storageBucket: "games-hackpack.firebasestorage.app",
+    messagingSenderId: "765398567944",
+    appId: "1:765398567944:web:0e5f86189f4947187995bd"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+// РЕФЕРАЛЬНАЯ ЛОГИКА
+const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "guest";
+const refLink = `https://t.me/moneylan_bot/hackpack?startapp=${userId}`;
+
+document.getElementById('invite-btn').onclick = () => {
+    const inviteText = encodeURIComponent("Присоединяйся к HACKPACK и майни Hashes вместе со мной!");
+    tg.openTelegramLink(`https://t.me/share/url?url=${refLink}&text=${inviteText}`);
+};
+
+// Проверка, пришел ли пользователь по ссылке (начисляем бонус один раз)
+if(tg.initDataUnsafe.start_param && !localStorage.getItem('ref_bonus_claimed')) {
+    let hashes = parseFloat(localStorage.getItem('h_save') || '0');
+    hashes += 500;
+    localStorage.setItem('h_save', hashes);
+    localStorage.setItem('ref_bonus_claimed', 'true');
+    alert("Вы получили 500 H за переход по реферальной ссылке!");
+}
 
 const userCountEl = document.getElementById('user-count');
 const presenceRef = db.ref('presence');
@@ -175,14 +187,6 @@ db.ref('.info/connected').on('value', (snap) => {
         myPresenceRef.set(true);
     }
 });
-
-presenceRef.on('value', (snap) => {
-    userCountEl.textContent = snap.numChildren() || 1;
-});
-
-// --- ЛОГИКА ИГРЫ ---
-const tg = window.Telegram.WebApp;
-tg.expand();
 
 let hashes = parseFloat(localStorage.getItem('h_save') || '0');
 let clickLvl = parseInt(localStorage.getItem('c_lvl_save') || '1');
@@ -236,33 +240,19 @@ function addLog(txt) {
     if(logBox.children.length > 6) logBox.lastChild.remove();
 }
 
-// Simulated dynamic user count logic
-const simulatedUserCountEl = document.getElementById('online-count-glow'); // Re-using a variable name is bad practice; changed.
-let simulatedBaseOnline = Math.floor(Math.random() * (1200 - 800 + 1)) + 800; // Starts around 800-1200
-
+let simulatedBaseOnline = Math.floor(Math.random() * (1200 - 800 + 1)) + 800;
 function updateSimulatedOnline() {
-    let variance = Math.floor(Math.random() * (20 - (-20) + 1)) + (-20); // Small variance
+    let variance = Math.floor(Math.random() * (20 - (-20) + 1)) + (-20);
     simulatedBaseOnline += variance;
-    
-    // Bounds to keep it realistic
     if (simulatedBaseOnline < 700) simulatedBaseOnline = 750;
     if (simulatedBaseOnline > 1500) simulatedBaseOnline = 1450;
-    
-    // Formatting the number
-    let formattedOnline = simulatedBaseOnline.toLocaleString('en-US', { minimumIntegerDigits: 1, useGrouping: true });
-    
-    // Update the UI element
+    let formattedOnline = simulatedBaseOnline.toLocaleString('en-US');
     userCountEl.innerHTML = `<span id="online-count-glow">${formattedOnline}</span>`; 
 }
 
-// Initial update
 updateSimulatedOnline();
-
-// Set interval for continuous updates every 2 seconds
 setInterval(updateSimulatedOnline, 2000);
-
 setInterval(() => { if(autoLvl > 0) { hashes += (autoLvl * 2) / 10; updateUI(); } }, 100);
-
 updateUI();
 </script>
 </body>
