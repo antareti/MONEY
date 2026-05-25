@@ -73,7 +73,7 @@ body{
 .info-val { color: #40a7e3; font-weight: bold; }
 
 .content-area { 
-    height: 130px; overflow: hidden; font-family: monospace; font-size: 11px; 
+    height: 130px; overflow-y: auto; font-family: monospace; font-size: 11px; 
     color: #8fdfff; margin-bottom: 20px; border-top: 1px solid rgba(64,167,227,0.2); 
     padding-top: 10px; position: relative; z-index: 2;
 }
@@ -131,8 +131,12 @@ button:active { transform: scale(0.96); filter: brightness(1.2); }
                 <span id="a-cost" style="color:#4cd964">150 H</span>
             </div>
             <div class="upgrade-btn" id="invite-btn" style="border-color:#4cd964">
-                <span>[NET] INVITE FRIENDS</span>
+                <span>[NET] SHARE LINK</span>
                 <span style="color:#4cd964">+500 H</span>
+            </div>
+            <div class="upgrade-btn" id="copy-btn" style="border-color:#40a7e3">
+                <span>[NET] COPY REF LINK</span>
+                <span id="copy-status" style="color:#40a7e3">COPY</span>
             </div>
         </div>
     </div>
@@ -168,13 +172,25 @@ document.getElementById('invite-btn').onclick = () => {
     tg.openTelegramLink(`https://t.me/share/url?url=${refLink}&text=${inviteText}`);
 };
 
-// Проверка, пришел ли пользователь по ссылке (начисляем бонус один раз)
+document.getElementById('copy-btn').onclick = () => {
+    navigator.clipboard.writeText(refLink).then(() => {
+        const status = document.getElementById('copy-status');
+        status.textContent = "DONE!";
+        status.style.color = "#4cd964";
+        setTimeout(() => {
+            status.textContent = "COPY";
+            status.style.color = "#40a7e3";
+        }, 2000);
+    });
+};
+
+// Проверка бонуса
 if(tg.initDataUnsafe.start_param && !localStorage.getItem('ref_bonus_claimed')) {
-    let hashes = parseFloat(localStorage.getItem('h_save') || '0');
-    hashes += 500;
-    localStorage.setItem('h_save', hashes);
+    let currentHashes = parseFloat(localStorage.getItem('h_save') || '0');
+    currentHashes += 500;
+    localStorage.setItem('h_save', currentHashes);
     localStorage.setItem('ref_bonus_claimed', 'true');
-    alert("Вы получили 500 H за переход по реферальной ссылке!");
+    tg.showAlert("Вы получили 500 H за переход по реферальной ссылке!");
 }
 
 const userCountEl = document.getElementById('user-count');
