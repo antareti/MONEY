@@ -14,22 +14,6 @@ body{
     position:relative;
 }
 
-/* === ФОН === */
-.bg-grid{
-    position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:
-        radial-gradient(ellipse at 50% 0%,rgba(64,167,227,.15),transparent 60%),
-        radial-gradient(ellipse at 50% 100%,rgba(0,255,200,.08),transparent 60%);
-}
-.bg-grid::before{
-    content:'';position:absolute;inset:0;
-    background-image:
-        linear-gradient(rgba(64,167,227,.08) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(64,167,227,.08) 1px,transparent 1px);
-    background-size:40px 40px;
-    transform:perspective(600px) rotateX(65deg);
-    transform-origin:top center;
-    mask-image:linear-gradient(to bottom,#000 0%,transparent 80%);
     -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 80%);
     animation:gridScroll 8s linear infinite;
 }
